@@ -1,0 +1,1954 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nasz Wyjątkowy Dzień 💕</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&family=Dancing+Script:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --rose: #c9748a;
+    --rose-light: #e8a4b5;
+    --rose-dark: #8b4a5c;
+    --cream: #fdf6f0;
+    --warm-white: #fff9f5;
+    --gold: #d4a853;
+    --gold-light: #f0d080;
+    --dark: #1a1a2e;
+    --darker: #0f0f1a;
+    --netflix-red: #e50914;
+    --netflix-dark: #141414;
+    --shadow-rose: rgba(201,116,138,0.3);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Lato', sans-serif;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+  }
+
+  /* ===== SCREEN MANAGEMENT ===== */
+  .screen {
+    position: fixed;
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.8s ease;
+    overflow-y: auto;
+  }
+  .screen.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  /* ===== SCREEN 1: COUNTDOWN ===== */
+  #screen-countdown {
+    background: linear-gradient(135deg, #1a0a10 0%, #2d1520 30%, #1a0a10 60%, #0d0510 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .bg-petals {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .petal {
+    position: absolute;
+    width: 8px;
+    height: 12px;
+    background: radial-gradient(ellipse, rgba(201,116,138,0.6) 0%, transparent 70%);
+    border-radius: 50% 0 50% 0;
+    animation: fall linear infinite;
+  }
+
+  @keyframes fall {
+    0% { transform: translateY(-20px) rotate(0deg) translateX(0); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 0.5; }
+    100% { transform: translateY(110vh) rotate(720deg) translateX(60px); opacity: 0; }
+  }
+
+  .glow-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.15;
+    animation: pulse-orb 4s ease-in-out infinite;
+  }
+  .glow-orb-1 { width: 400px; height: 400px; background: var(--rose); top: -100px; left: -100px; animation-delay: 0s; }
+  .glow-orb-2 { width: 300px; height: 300px; background: var(--gold); bottom: -80px; right: -80px; animation-delay: 2s; }
+  .glow-orb-3 { width: 200px; height: 200px; background: var(--rose-light); top: 40%; left: 50%; animation-delay: 1s; }
+
+  @keyframes pulse-orb {
+    0%, 100% { transform: scale(1); opacity: 0.15; }
+    50% { transform: scale(1.2); opacity: 0.25; }
+  }
+
+  .countdown-content {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+  }
+
+  .countdown-title {
+    font-family: 'Dancing Script', cursive;
+    font-size: clamp(2rem, 6vw, 4rem);
+    color: var(--rose-light);
+    text-shadow: 0 0 30px rgba(201,116,138,0.5), 0 2px 4px rgba(0,0,0,0.5);
+    letter-spacing: 2px;
+    animation: float-title 3s ease-in-out infinite;
+  }
+
+  .countdown-subtitle {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(0.8rem, 2vw, 1.1rem);
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-top: -30px;
+  }
+
+  @keyframes float-title {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+
+  .timer-container {
+    display: flex;
+    gap: clamp(10px, 3vw, 24px);
+    align-items: center;
+  }
+
+  .timer-unit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .timer-box {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(201,116,138,0.3);
+    border-radius: 16px;
+    padding: clamp(12px, 3vw, 20px) clamp(16px, 4vw, 28px);
+    min-width: clamp(60px, 15vw, 100px);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1), 0 0 20px rgba(201,116,138,0.1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .timer-box::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(201,116,138,0.5), transparent);
+  }
+
+  .timer-number {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 8vw, 4.5rem);
+    font-weight: 700;
+    color: #fff;
+    line-height: 1;
+    text-shadow: 0 0 20px rgba(201,116,138,0.4);
+    transition: all 0.3s ease;
+  }
+
+  .timer-label {
+    font-family: 'Lato', sans-serif;
+    font-size: clamp(0.55rem, 1.5vw, 0.75rem);
+    color: var(--rose-light);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  .timer-separator {
+    font-size: clamp(1.5rem, 5vw, 3rem);
+    color: var(--rose);
+    margin-bottom: 20px;
+    animation: blink 1s ease-in-out infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.2; }
+  }
+
+  /* Hearts */
+  .hearts-container {
+    display: flex;
+    gap: 32px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.8s ease, transform 0.8s ease;
+    transform: translateY(20px);
+  }
+
+  .hearts-container.visible {
+    opacity: 1;
+    pointer-events: all;
+    transform: translateY(0);
+  }
+
+  .heart-btn {
+    position: relative;
+    width: clamp(130px, 30vw, 180px);
+    height: clamp(130px, 30vw, 180px);
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: transform 0.3s ease;
+  }
+
+  .heart-btn:hover { transform: scale(1.08); }
+  .heart-btn:active { transform: scale(0.96); }
+
+  .heart-shape {
+    position: absolute;
+    inset: 0;
+    transition: all 0.3s ease;
+  }
+
+  .heart-shape svg {
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(0 8px 20px rgba(201,116,138,0.5));
+    transition: filter 0.3s ease;
+  }
+
+  .heart-btn:hover .heart-shape svg {
+    filter: drop-shadow(0 12px 30px rgba(201,116,138,0.8));
+  }
+
+  .heart-text {
+    position: relative;
+    z-index: 2;
+    font-family: 'Dancing Script', cursive;
+    font-size: clamp(0.85rem, 2.5vw, 1.1rem);
+    color: #fff;
+    text-align: center;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    padding: 0 16px;
+    line-height: 1.3;
+  }
+
+  /* Skip button */
+  .skip-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.4);
+    font-family: 'Lato', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 8px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    backdrop-filter: blur(5px);
+    transition: all 0.3s ease;
+    z-index: 100;
+  }
+  .skip-btn:hover {
+    background: rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.7);
+    border-color: rgba(255,255,255,0.3);
+  }
+
+  /* ===== SCREEN 2: INSTRUCTIONS ===== */
+  #screen-instructions {
+    background: linear-gradient(160deg, #fdf0f3 0%, #fff5f0 50%, #fdf0f3 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .instructions-bg-decor {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  .decor-circle {
+    position: absolute;
+    border-radius: 50%;
+    border: 1px solid rgba(201,116,138,0.15);
+  }
+  .decor-circle-1 { width: 600px; height: 600px; top: -200px; left: -200px; }
+  .decor-circle-2 { width: 400px; height: 400px; bottom: -150px; right: -100px; }
+
+  .instructions-card {
+    background: rgba(255,255,255,0.9);
+    backdrop-filter: blur(20px);
+    border-radius: 32px;
+    padding: clamp(32px, 5vw, 56px);
+    max-width: 640px;
+    width: 100%;
+    box-shadow: 0 30px 80px rgba(201,116,138,0.15), 0 2px 4px rgba(0,0,0,0.05);
+    border: 1px solid rgba(201,116,138,0.2);
+    position: relative;
+    z-index: 10;
+  }
+
+  .instructions-card::before {
+    content: '♡';
+    position: absolute;
+    top: -18px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 2rem;
+    color: var(--rose);
+    background: var(--cream);
+    padding: 0 12px;
+    line-height: 1;
+  }
+
+  .instructions-title {
+    font-family: 'Dancing Script', cursive;
+    font-size: clamp(2rem, 5vw, 3rem);
+    color: var(--rose-dark);
+    text-align: center;
+    margin-bottom: 32px;
+  }
+
+  .instructions-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 40px;
+  }
+
+  .instructions-list li {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    font-family: 'Lato', sans-serif;
+    font-size: clamp(0.85rem, 2vw, 0.95rem);
+    color: #555;
+    line-height: 1.6;
+  }
+
+  .rule-number {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    background: linear-gradient(135deg, var(--rose), var(--rose-dark));
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-top: 1px;
+  }
+
+  .ready-btn {
+    display: block;
+    width: 100%;
+    padding: 18px;
+    background: linear-gradient(135deg, var(--rose) 0%, var(--rose-dark) 100%);
+    color: white;
+    border: none;
+    border-radius: 16px;
+    font-family: 'Dancing Script', cursive;
+    font-size: 1.4rem;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(201,116,138,0.4);
+    transition: all 0.3s ease;
+    letter-spacing: 1px;
+  }
+
+  .ready-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(201,116,138,0.55);
+  }
+
+  .ready-btn:active { transform: translateY(0); }
+
+  /* ===== SCREEN 3: CHALLENGES ===== */
+  #screen-challenges {
+    background: linear-gradient(160deg, #fdf0f3 0%, #fff5f0 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    padding-bottom: 40px;
+    position: relative;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+
+  .challenges-header {
+    width: 100%;
+    max-width: 680px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 0 24px;
+    position: relative;
+    z-index: 10;
+  }
+
+  .progress-info {
+    font-family: 'Lato', sans-serif;
+    font-size: 0.8rem;
+    color: var(--rose);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+
+  .progress-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: rgba(201,116,138,0.15);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--rose-light), var(--rose));
+    border-radius: 2px;
+    transition: width 0.6s ease;
+  }
+
+  .challenge-wrapper {
+    width: 100%;
+    max-width: 680px;
+    position: relative;
+    z-index: 10;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .challenge-card {
+    background: #ffffff;
+    border-radius: 28px;
+    padding: clamp(24px, 4vw, 40px);
+    box-shadow: 0 20px 60px rgba(201,116,138,0.15), 0 4px 8px rgba(0,0,0,0.04), 0 0 0 1px rgba(201,116,138,0.08);
+    position: relative;
+    overflow: hidden;
+    animation: card-enter 0.5s ease;
+  }
+
+  @keyframes card-enter {
+    0% { opacity: 0; transform: translateY(30px) scale(0.97); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .challenge-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--rose-light), var(--rose), var(--rose-dark));
+  }
+
+  .challenge-number {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Lato', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--rose);
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
+
+  .challenge-number-badge {
+    width: 24px;
+    height: 24px;
+    background: linear-gradient(135deg, var(--rose), var(--rose-dark));
+    border-radius: 50%;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+  }
+
+  .challenge-description {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1rem, 3vw, 1.25rem);
+    color: #2a1520;
+    line-height: 1.7;
+    margin-bottom: 8px;
+  }
+
+  /* Map embed */
+  .map-container {
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    margin: 16px 0;
+    position: relative;
+  }
+
+  .map-container iframe {
+    width: 100%;
+    height: 220px;
+    border: none;
+    display: block;
+  }
+
+  .map-open-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 20px;
+    background: linear-gradient(135deg, #4285f4, #1a73e8);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-family: 'Lato', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 16px rgba(66,133,244,0.3);
+    width: fit-content;
+    margin: 16px 0;
+  }
+
+  .map-open-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(66,133,244,0.4);
+  }
+
+  /* Upload zone */
+  .upload-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .upload-area {
+    border: 2px dashed rgba(201,116,138,0.3);
+    border-radius: 20px;
+    padding: 32px 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    background: rgba(201,116,138,0.02);
+  }
+
+  .upload-area:hover, .upload-area.dragover {
+    border-color: var(--rose);
+    background: rgba(201,116,138,0.06);
+    transform: scale(1.01);
+  }
+
+  .upload-area input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+  }
+
+  .upload-icon {
+    font-size: 2.5rem;
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  .upload-text {
+    font-family: 'Lato', sans-serif;
+    font-size: 0.9rem;
+    color: var(--rose);
+    font-weight: 700;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .upload-subtext {
+    font-family: 'Lato', sans-serif;
+    font-size: 0.75rem;
+    color: #aaa;
+  }
+
+  .upload-label {
+    font-family: 'Lato', sans-serif;
+    font-size: 0.8rem;
+    color: #888;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+
+  .preview-container {
+    border-radius: 16px;
+    overflow: hidden;
+    background: #000;
+    position: relative;
+    max-height: 280px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .preview-container img {
+    max-width: 100%;
+    max-height: 280px;
+    object-fit: contain;
+    border-radius: 16px;
+  }
+
+  .preview-container video {
+    max-width: 100%;
+    max-height: 280px;
+    border-radius: 16px;
+  }
+
+  .preview-remove {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 28px;
+    height: 28px;
+    background: rgba(0,0,0,0.6);
+    border: none;
+    border-radius: 50%;
+    color: white;
+    font-size: 0.8rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+  }
+
+  .preview-remove:hover { background: rgba(200,30,30,0.8); }
+
+  /* Options for task 8 */
+  .options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 16px 0;
+  }
+
+  .option-btn {
+    padding: 16px;
+    background: rgba(201,116,138,0.06);
+    border: 2px solid rgba(201,116,138,0.2);
+    border-radius: 14px;
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    color: var(--rose-dark);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+  }
+
+  .option-btn:hover {
+    background: rgba(201,116,138,0.12);
+    border-color: var(--rose);
+    transform: translateY(-2px);
+  }
+
+  .option-btn.selected {
+    background: linear-gradient(135deg, var(--rose), var(--rose-dark));
+    border-color: var(--rose-dark);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(201,116,138,0.4);
+  }
+
+  /* Submit button */
+  .submit-btn {
+    padding: 18px 40px;
+    background: linear-gradient(135deg, var(--rose) 0%, var(--rose-dark) 100%);
+    color: white;
+    border: none;
+    border-radius: 16px;
+    font-family: 'Dancing Script', cursive;
+    font-size: 1.4rem;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(201,116,138,0.4);
+    transition: all 0.4s ease;
+    width: 100%;
+    letter-spacing: 1px;
+    opacity: 0.4;
+    pointer-events: none;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .submit-btn.enabled {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .submit-btn.enabled:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(201,116,138,0.55);
+  }
+
+  .submit-btn.loading {
+    cursor: not-allowed;
+  }
+
+  .submit-btn-ripple {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transform: translateX(-100%);
+    animation: shimmer 1.5s infinite;
+  }
+
+  @keyframes shimmer {
+    100% { transform: translateX(100%); }
+  }
+
+  /* ===== SCREEN 4: NETFLIX FINALE ===== */
+  #screen-finale {
+    background: var(--netflix-dark);
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+
+  /* Netflix Hero Banner */
+  .hero-banner {
+    position: relative;
+    width: 100%;
+    height: clamp(320px, 55vw, 520px);
+    overflow: hidden;
+    background: #000;
+  }
+
+  .hero-slides {
+    display: flex;
+    transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    height: 100%;
+  }
+
+  .hero-slide {
+    flex-shrink: 0;
+    width: 100%;
+    height: 100%;
+    position: relative;
+  }
+
+  .hero-slide img,
+  .hero-slide video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .hero-gradient {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to bottom,
+      rgba(20,20,20,0.1) 0%,
+      rgba(20,20,20,0) 30%,
+      rgba(20,20,20,0.7) 70%,
+      rgba(20,20,20,1) 100%
+    ), linear-gradient(
+      to right,
+      rgba(20,20,20,0.8) 0%,
+      transparent 60%
+    );
+  }
+
+  .hero-content {
+    position: absolute;
+    bottom: clamp(30px, 6vw, 80px);
+    left: clamp(20px, 5vw, 60px);
+    z-index: 5;
+  }
+
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 7vw, 4.5rem);
+    font-weight: 700;
+    color: #fff;
+    text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+    line-height: 1.1;
+    margin-bottom: 12px;
+  }
+
+  .hero-subtitle {
+    font-family: 'Dancing Script', cursive;
+    font-size: clamp(1rem, 3vw, 1.6rem);
+    color: rgba(255,255,255,0.7);
+  }
+
+  .hero-dots {
+    position: absolute;
+    bottom: 20px;
+    right: 30px;
+    display: flex;
+    gap: 8px;
+  }
+
+  .hero-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.3);
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .hero-dot.active {
+    background: white;
+    transform: scale(1.3);
+  }
+
+  /* Netflix rows */
+  .netflix-content {
+    padding: clamp(10px, 3vw, 30px) 0;
+  }
+
+  .netflix-row {
+    margin-bottom: clamp(20px, 4vw, 40px);
+  }
+
+  .row-title {
+    font-family: 'Lato', sans-serif;
+    font-size: clamp(1rem, 2.5vw, 1.3rem);
+    font-weight: 700;
+    color: #e5e5e5;
+    padding: 0 clamp(16px, 4vw, 56px);
+    margin-bottom: 12px;
+    letter-spacing: 0.5px;
+  }
+
+  .row-items {
+    display: flex;
+    gap: 8px;
+    padding: 8px clamp(16px, 4vw, 56px);
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    scroll-behavior: smooth;
+  }
+
+  .row-items::-webkit-scrollbar { display: none; }
+
+  .media-thumb {
+    flex-shrink: 0;
+    width: clamp(140px, 22vw, 240px);
+    height: clamp(90px, 14vw, 150px);
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+    background: #2a2a2a;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .media-thumb:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+    z-index: 2;
+  }
+
+  .media-thumb img,
+  .media-thumb video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .media-thumb .play-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.3s;
+  }
+
+  .media-thumb:hover .play-overlay {
+    background: rgba(0,0,0,0.3);
+  }
+
+  .play-icon {
+    width: 44px;
+    height: 44px;
+    background: rgba(255,255,255,0.85);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.3s ease;
+  }
+
+  .media-thumb:hover .play-icon {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  /* Placeholder for missing media */
+  .media-placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #1a1a2e, #2a1a2e);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: rgba(255,255,255,0.2);
+  }
+
+  .vhs-icon {
+    font-size: 2rem;
+    opacity: 0.4;
+  }
+
+  .placeholder-text {
+    font-family: 'Lato', sans-serif;
+    font-size: 0.6rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.2);
+  }
+
+  /* Lightbox */
+  .lightbox {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.95);
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    animation: fade-in 0.3s ease;
+  }
+
+  .lightbox.open { display: flex; }
+
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .lightbox-close {
+    position: absolute;
+    top: 20px;
+    right: 24px;
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.7);
+    font-size: 2rem;
+    cursor: pointer;
+    transition: color 0.2s;
+    z-index: 10;
+  }
+
+  .lightbox-close:hover { color: white; }
+
+  .lightbox-media {
+    max-width: 90vw;
+    max-height: 90vh;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .lightbox-media img,
+  .lightbox-media video {
+    max-width: 90vw;
+    max-height: 90vh;
+    object-fit: contain;
+  }
+
+  /* Netflix header */
+  .netflix-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: clamp(10px, 3vw, 20px) clamp(16px, 4vw, 56px);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 10;
+    background: linear-gradient(to bottom, rgba(20,20,20,0.9), transparent);
+  }
+
+  .netflix-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.2rem, 3vw, 1.8rem);
+    font-weight: 700;
+    color: var(--netflix-red);
+    letter-spacing: 2px;
+  }
+
+  .netflix-date {
+    font-family: 'Lato', sans-serif;
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  /* Responsive */
+  @media (max-width: 480px) {
+    .timer-container { gap: 8px; }
+    .hearts-container { gap: 20px; }
+    .options-grid { grid-template-columns: 1fr; }
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: linear-gradient(135deg, var(--rose), var(--rose-dark));
+    color: white;
+    padding: 14px 28px;
+    border-radius: 50px;
+    font-family: 'Lato', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    box-shadow: 0 8px 24px rgba(201,116,138,0.5);
+    z-index: 500;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* Screen transition */
+  .screen-fade-enter {
+    animation: screen-enter 0.6s ease forwards;
+  }
+
+  @keyframes screen-enter {
+    from { opacity: 0; transform: scale(0.98); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  /* Video type badge */
+  .media-type-badge {
+    position: absolute;
+    bottom: 6px;
+    left: 6px;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    font-size: 0.6rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-family: 'Lato', sans-serif;
+    font-weight: 700;
+  }
+
+  .finale-message {
+    text-align: center;
+    padding: 40px 20px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    margin-top: 20px;
+  }
+
+  .finale-message p {
+    font-family: 'Dancing Script', cursive;
+    font-size: clamp(1.2rem, 3vw, 1.8rem);
+    color: rgba(255,255,255,0.4);
+  }
+
+  /* Map iframe wrapper */
+  .map-embed-wrapper {
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    margin: 16px 0;
+  }
+
+  .map-embed-wrapper iframe {
+    width: 100%;
+    height: 220px;
+    border: none;
+    display: block;
+  }
+</style>
+</head>
+<body>
+
+<!-- SCREEN 1: COUNTDOWN -->
+<div id="screen-countdown" class="screen active">
+  <div class="bg-petals" id="petals-container"></div>
+  <div class="glow-orb glow-orb-1"></div>
+  <div class="glow-orb glow-orb-2"></div>
+  <div class="glow-orb glow-orb-3"></div>
+
+  <div class="countdown-content">
+    <div>
+      <h1 class="countdown-title">Nasz Wyjątkowy Dzień</h1>
+      <p class="countdown-subtitle">5 Czerwca 2026 · 13:00</p>
+    </div>
+
+    <div class="timer-container">
+      <div class="timer-unit">
+        <div class="timer-box"><div class="timer-number" id="days">00</div></div>
+        <span class="timer-label">Dni</span>
+      </div>
+      <span class="timer-separator">:</span>
+      <div class="timer-unit">
+        <div class="timer-box"><div class="timer-number" id="hours">00</div></div>
+        <span class="timer-label">Godziny</span>
+      </div>
+      <span class="timer-separator">:</span>
+      <div class="timer-unit">
+        <div class="timer-box"><div class="timer-number" id="minutes">00</div></div>
+        <span class="timer-label">Minuty</span>
+      </div>
+      <span class="timer-separator">:</span>
+      <div class="timer-unit">
+        <div class="timer-box"><div class="timer-number" id="seconds">00</div></div>
+        <span class="timer-label">Sekundy</span>
+      </div>
+    </div>
+
+    <div class="hearts-container" id="hearts-container">
+      <button class="heart-btn" onclick="selectRole('her')">
+        <span class="heart-shape">
+          <svg viewBox="0 0 200 180" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <radialGradient id="heartGrad1" cx="40%" cy="35%" r="60%">
+                <stop offset="0%" stop-color="#f0a0b5"/>
+                <stop offset="100%" stop-color="#8b3a5c"/>
+              </radialGradient>
+              <filter id="glow1">
+                <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+            </defs>
+            <path d="M100 158 C100 158 20 110 20 65 C20 40 38 22 60 22 C76 22 90 30 100 42 C110 30 124 22 140 22 C162 22 180 40 180 65 C180 110 100 158 100 158Z" fill="url(#heartGrad1)" filter="url(#glow1)"/>
+          </svg>
+        </span>
+        <span class="heart-text">Gotowa na<br>przygodę</span>
+      </button>
+
+      <button class="heart-btn" onclick="selectRole('him')">
+        <span class="heart-shape">
+          <svg viewBox="0 0 200 180" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <radialGradient id="heartGrad2" cx="40%" cy="35%" r="60%">
+                <stop offset="0%" stop-color="#d4a853"/>
+                <stop offset="100%" stop-color="#8b6a20"/>
+              </radialGradient>
+              <filter id="glow2">
+                <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+            </defs>
+            <path d="M100 158 C100 158 20 110 20 65 C20 40 38 22 60 22 C76 22 90 30 100 42 C110 30 124 22 140 22 C162 22 180 40 180 65 C180 110 100 158 100 158Z" fill="url(#heartGrad2)" filter="url(#glow2)"/>
+          </svg>
+        </span>
+        <span class="heart-text">Gotowy na<br>przygodę</span>
+      </button>
+    </div>
+  </div>
+
+  <button class="skip-btn" onclick="skipCountdown()">Skip Countdown</button>
+</div>
+
+<!-- SCREEN 2: INSTRUCTIONS -->
+<div id="screen-instructions" class="screen">
+  <div class="instructions-bg-decor">
+    <div class="decor-circle decor-circle-1"></div>
+    <div class="decor-circle decor-circle-2"></div>
+  </div>
+  <div class="instructions-card screen-fade-enter">
+    <h2 class="instructions-title">Lista Zasad</h2>
+    <ol class="instructions-list">
+      <li><span class="rule-number">1</span><span>Przygotowałem dla nas na dzisiaj kilka wyzwań.</span></li>
+      <li><span class="rule-number">2</span><span>Ze względu na dzisiejszy wyjątkowy dzień, przygotowałem kilka niespodzianek, a na tej stronie będziesz się dowiadywała/dowiadywał jakie.</span></li>
+      <li><span class="rule-number">3</span><span>Zaraz przejdziemy na pierwszą stronę z wyzwaniem na dzisiaj, będzie to zrobienie makijażu i dobór ubioru ze szczegółami.</span></li>
+      <li><span class="rule-number">4</span><span>Wykonanie zadania musisz potwierdzić za pomocą zdjęcia lub nagrania wideo według instrukcji.</span></li>
+      <li><span class="rule-number">5</span><span>Gra ma za zadanie urozmaicić ci dzień o dodatkową atrakcję, ale jeśli wykonasz wszystkie zadania to na koniec dnia odblokujesz dodatkowy prezent.</span></li>
+      <li><span class="rule-number">6</span><span>Ja również będę wykonywać wyzwania.</span></li>
+    </ol>
+    <button class="ready-btn" id="ready-btn" onclick="startChallenges()">Gotowa</button>
+  </div>
+</div>
+
+<!-- SCREEN 3: CHALLENGES -->
+<div id="screen-challenges" class="screen">
+  <div class="challenges-header">
+    <span class="progress-info" id="progress-text">Wyzwanie 1 z 15</span>
+    <span class="progress-info" id="role-badge">★</span>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill" style="width:6.6%"></div>
+    </div>
+  </div>
+
+  <div class="challenge-wrapper" id="challenge-wrapper">
+    <!-- Dynamic content injected here -->
+  </div>
+</div>
+
+<!-- SCREEN 4: FINALE -->
+<div id="screen-finale" class="screen">
+  <div style="position:relative;">
+    <div class="netflix-header">
+      <span class="netflix-logo">MEMORIES</span>
+      <span class="netflix-date" id="finale-date"></span>
+    </div>
+
+    <div class="hero-banner">
+      <div class="hero-slides" id="hero-slides"></div>
+      <div class="hero-gradient"></div>
+      <div class="hero-content">
+        <h1 class="hero-title">Nasz Wyjątkowy<br>Dzień</h1>
+        <p class="hero-subtitle">5 Czerwca 2026 💕</p>
+      </div>
+      <div class="hero-dots" id="hero-dots"></div>
+    </div>
+
+    <div class="netflix-content" id="netflix-content">
+      <!-- Rows injected here -->
+    </div>
+
+    <div class="finale-message">
+      <p>Dziękuję, że jesteś częścią mojego życia ♡</p>
+    </div>
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <div class="lightbox-media" id="lightbox-media"></div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== STATE =====
+let role = null;
+let currentTask = 0;
+let taskUploads = {}; // { taskIndex: { slotKey: { dataUrl, type } } }
+let countdownFinished = false;
+let heroSlideIndex = 0;
+let heroSlides = [];
+let heroTimer = null;
+
+// ===== TASKS DATA =====
+const tasksHer = [
+  {
+    id: 1,
+    description: "Zaczniemy od przygotowań, na pierwszy ogień pójdziemy z makijażem.",
+    uploads: [{ key: "makeup", label: "Zdjęcie makijażu", accept: "image/*", icon: "📸" }]
+  },
+  {
+    id: 2,
+    description: "Cały dzień składa się z różnych aktywności dlatego to wyzwanie będzie wymagało aż dwóch zdjęć. Na teraz przygotuj ładny ubiór — za sukienkę dam ci dodatkowe punkty 😉 Drugi strój powinien być wygodny, ale jednocześnie podobać ci się na zdjęciach.",
+    uploads: [
+      { key: "dress", label: "Elegancki strój", accept: "image/*", icon: "👗" },
+      { key: "dresy", label: "Wygodny strój", accept: "image/*", icon: "👖" }
+    ]
+  },
+  {
+    id: 3,
+    description: "Zanim wyjdziemy, chciałbym żebyś nagrała czego się dzisiaj spodziewasz.",
+    uploads: [{ key: "video", label: "Nagraj wideo", accept: "video/*", icon: "🎥" }]
+  },
+  {
+    id: 4,
+    description: "Podążaj za nawigacją, a na miejscu pokaż zdjęciem gdzie jesteś.",
+    map: "https://maps.app.goo.gl/i4PBWH8owSXakAPW7?g_st=ic",
+    uploads: [{ key: "location", label: "Zdjęcie z miejsca", accept: "image/*", icon: "📍" }]
+  },
+  {
+    id: 5,
+    description: "Teraz wyzwanie przed nami większe — bo zdjęcie i filmik dodać musimy.",
+    uploads: [
+      { key: "photo", label: "Zdjęcie", accept: "image/*", icon: "📸" },
+      { key: "video", label: "Nagranie wideo", accept: "video/*", icon: "🎥" }
+    ]
+  },
+  {
+    id: 6,
+    description: "Spokojnie podkręcamy troszeczkę tempo, gdy za mapą podążysz to znajdziesz cel.",
+    map: "https://maps.app.goo.gl/tKU8g4QoxJgnY5j77?g_st=ic",
+    uploads: [{ key: "photo", label: "Zdjęcie z miejsca", accept: "image/*", icon: "📸" }]
+  },
+  {
+    id: 7,
+    description: "Ciekawi mnie co o tej niespodziance sądzisz — więc podziel się myślami w filmiku.",
+    uploads: [{ key: "video", label: "Nagraj swoje myśli", accept: "video/*", icon: "🎥" }]
+  },
+  {
+    id: 8,
+    description: "Co to byłby za dzień gdybyśmy głodni ganiali — niech zalążek zdecyduje i palcem na właściwy wybór pokieruje.",
+    choiceTask: true,
+    map: "https://maps.app.goo.gl/tKU8g4QoxJgnY5j77?g_st=ic",
+    uploads: []
+  },
+  {
+    id: 9,
+    description: "Jedzonko wybrane? To czas na zdjęcie gdzie nam się przyszło stołować.",
+    uploads: [{ key: "photo", label: "Zdjęcie restauracji", accept: "image/*", icon: "🍽️" }]
+  },
+  {
+    id: 10,
+    description: "Zapomniałbym poprosić o zdjęcie, żeby zobaczyć co wybraliśmy do jedzonka!",
+    uploads: [{ key: "food", label: "Zdjęcie jedzenia", accept: "image/*", icon: "🍕" }]
+  },
+  {
+    id: 11,
+    description: "Z pełnym brzuchem warto odziać się w coś wygodnego — wróćmy się przebrać i odsapnąć po jedzeniu.",
+    uploads: [{ key: "outfit", label: "Zdjęcie w nowym stroju", accept: "image/*", icon: "👗" }]
+  },
+  {
+    id: 12,
+    description: "To jeszcze nie koniec, chociaż już się zbliża. Jaka przygoda czeka na nas na końcu tej drogi.",
+    map: "https://maps.app.goo.gl/2KucpPwJyDKgSmPN7?g_st=ic",
+    uploads: [{ key: "photo", label: "Zdjęcie z miejsca", accept: "image/*", icon: "📍" }]
+  },
+  {
+    id: 13,
+    description: "Dzień pełen wrażeń — lecz najpierw opowiedz mi jakie odczucia masz do tej pory i prognozę jak uważasz co jeszcze dzisiaj nas czeka?",
+    uploads: [{ key: "video", label: "Nagraj refleksje", accept: "video/*", icon: "🎥" }]
+  },
+  {
+    id: 14,
+    description: "Niespodzianka ostatnia pod tym adresem się kryje.",
+    map: "https://maps.app.goo.gl/tYF2AyydwiBPqnGr8?g_st=ic",
+    uploads: [{ key: "photo", label: "Zdjęcie z niespodzianki", accept: "image/*", icon: "🎁" }]
+  },
+  {
+    id: 15,
+    description: "Ostatnie wyzwanie przed tobą — opowiedz mi proszę jak ci się ten dzień podobał? Co cię zaskoczyło, co podobało (lub bardziej lub mniej).",
+    uploads: [{ key: "video", label: "Końcowe przemyślenia", accept: "video/*", icon: "🎥" }]
+  }
+];
+
+const tasksHim = [
+  {
+    id: 1,
+    description: "Wrzuć nagranie z kwiatami i otwieraniem boxa.",
+    uploads: [
+      { key: "flowers", label: "Nagranie z kwiatami", accept: "video/*", icon: "💐" },
+      { key: "box", label: "Nagranie z otwieraniem boxa", accept: "video/*", icon: "🎁" }
+    ]
+  },
+  {
+    id: 2,
+    description: "Dwa ubrania — wiesz co robić.",
+    uploads: [
+      { key: "suit", label: "Elegancki strój", accept: "image/*", icon: "👔" },
+      { key: "chill", label: "Casualowy strój", accept: "image/*", icon: "👕" }
+    ]
+  },
+  {
+    id: 3,
+    description: "Zanim wyjdziemy — wspólne zdjęcie.",
+    uploads: [{ key: "together", label: "Wspólne zdjęcie", accept: "image/*", icon: "📸" }]
+  },
+  {
+    id: 4,
+    description: "Jadąc w to miejsce nagraj jakiś fajny filmik.",
+    map: "https://maps.app.goo.gl/i4PBWH8owSXakAPW7?g_st=ic",
+    uploads: [{ key: "video", label: "Filmik w drodze", accept: "video/*", icon: "🎥" }]
+  },
+  {
+    id: 5,
+    description: "Zrób zdjęcie i film.",
+    uploads: [
+      { key: "photo", label: "Zdjęcie", accept: "image/*", icon: "📸" },
+      { key: "video", label: "Nagranie wideo", accept: "video/*", icon: "🎥" }
+    ]
+  },
+  {
+    id: 6,
+    description: "Wspólne zdjęcie — escape room.",
+    uploads: [{ key: "escape", label: "Wspólne zdjęcie", accept: "image/*", icon: "🚪" }]
+  },
+  {
+    id: 7,
+    description: "Zrób 2 zdjęcia w pokoju.",
+    uploads: [
+      { key: "room", label: "Zdjęcie 1 — pokój", accept: "image/*", icon: "📸" },
+      { key: "back", label: "Zdjęcie 2 — tył", accept: "image/*", icon: "📷" }
+    ]
+  },
+  {
+    id: 8,
+    description: "Ty wybierz.",
+    choiceTask: true,
+    map: "https://maps.app.goo.gl/tKU8g4QoxJgnY5j77?g_st=ic",
+    uploads: []
+  },
+  {
+    id: 9,
+    description: "Zdjęcie przed jedzeniem.",
+    uploads: [{ key: "before", label: "Zdjęcie przed jedzeniem", accept: "image/*", icon: "🍽️" }]
+  },
+  {
+    id: 10,
+    description: "Zdjęcie po jedzeniu.",
+    uploads: [{ key: "after", label: "Zdjęcie po jedzeniu", accept: "image/*", icon: "😋" }]
+  },
+  {
+    id: 11,
+    description: "Zdjęcie w drugich ciuchach.",
+    uploads: [{ key: "outfit", label: "Zdjęcie w stroju", accept: "image/*", icon: "👕" }]
+  },
+  {
+    id: 12,
+    description: "Filmik — zapytaj się Domi jak się czuje i czy jej się będzie podobać.",
+    uploads: [{ key: "video", label: "Filmik z Domi", accept: "video/*", icon: "🎥" }]
+  },
+  {
+    id: 13,
+    description: "Wspólna fota po Zoltarze.",
+    uploads: [{ key: "zoltar", label: "Wspólne zdjęcie", accept: "image/*", icon: "🎪" }]
+  },
+  {
+    id: 14,
+    description: "Zrób 2 zdjęcia z bilardu.",
+    uploads: [
+      { key: "bil", label: "Zdjęcie 1 — bilard", accept: "image/*", icon: "🎱" },
+      { key: "lard", label: "Zdjęcie 2 — bilard", accept: "image/*", icon: "🎱" }
+    ]
+  },
+  {
+    id: 15,
+    description: "Zrób filmik z bilardu.",
+    uploads: [{ key: "video", label: "Filmik z bilardu", accept: "video/*", icon: "🎥" }]
+  }
+];
+
+// Netflix sections mapping
+const netflixSections = [
+  { title: "🌸 Poranna Miłość", tasks: [1, 2, 3] },
+  { title: "🌊 Spacer Pośród Fal", tasks: [4, 5] },
+  { title: "💖 OBŁĘDNIE Cię Kocham", tasks: [6, 7] },
+  { title: "🍝 Przez serce do żołądka", tasks: [9, 10] },
+  { title: "💃 Zabójczo piękna", tasks: [11, 12, 13] },
+  { title: "🌙 Późną porą…", tasks: [14, 15] }
+];
+
+// ===== PETAL ANIMATION =====
+function createPetals() {
+  const container = document.getElementById('petals-container');
+  for (let i = 0; i < 20; i++) {
+    const petal = document.createElement('div');
+    petal.className = 'petal';
+    petal.style.left = Math.random() * 100 + 'vw';
+    petal.style.animationDuration = (6 + Math.random() * 8) + 's';
+    petal.style.animationDelay = (Math.random() * 8) + 's';
+    petal.style.width = (6 + Math.random() * 8) + 'px';
+    petal.style.height = (8 + Math.random() * 10) + 'px';
+    container.appendChild(petal);
+  }
+}
+
+// ===== COUNTDOWN =====
+const TARGET_DATE = new Date('2026-06-05T13:00:00');
+
+function updateCountdown() {
+  const now = new Date();
+  const diff = TARGET_DATE - now;
+
+  if (diff <= 0) {
+    document.getElementById('days').textContent = '00';
+    document.getElementById('hours').textContent = '00';
+    document.getElementById('minutes').textContent = '00';
+    document.getElementById('seconds').textContent = '00';
+    showHearts();
+    countdownFinished = true;
+    return;
+  }
+
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+  document.getElementById('days').textContent = String(days).padStart(2, '0');
+  document.getElementById('hours').textContent = String(hours).padStart(2, '0');
+  document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
+  document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
+}
+
+function showHearts() {
+  document.getElementById('hearts-container').classList.add('visible');
+}
+
+function skipCountdown() {
+  document.getElementById('days').textContent = '00';
+  document.getElementById('hours').textContent = '00';
+  document.getElementById('minutes').textContent = '00';
+  document.getElementById('seconds').textContent = '00';
+  countdownFinished = true;
+  showHearts();
+}
+
+// ===== NAVIGATION =====
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const target = document.getElementById('screen-' + id);
+  target.classList.add('active');
+  target.scrollTop = 0;
+}
+
+function selectRole(r) {
+  role = r;
+  localStorage.setItem('adventure_role', r);
+  // Update instruction button
+  document.getElementById('ready-btn').textContent = r === 'her' ? 'Gotowa! ♡' : 'Gotowy! ♡';
+  showScreen('instructions');
+}
+
+function startChallenges() {
+  currentTask = 0;
+  taskUploads = {};
+  renderChallenge();
+  showScreen('challenges');
+}
+
+// ===== CHALLENGE ENGINE =====
+function getTasks() {
+  return role === 'her' ? tasksHer : tasksHim;
+}
+
+function renderChallenge() {
+  const tasks = getTasks();
+  const task = tasks[currentTask];
+  const total = tasks.length;
+
+  // Update progress
+  document.getElementById('progress-text').textContent = `Wyzwanie ${currentTask + 1} z ${total}`;
+  document.getElementById('role-badge').textContent = role === 'her' ? '♀ Her' : '♂ Him';
+  document.getElementById('progress-fill').style.width = ((currentTask + 1) / total * 100) + '%';
+
+  const wrapper = document.getElementById('challenge-wrapper');
+
+  // Map HTML
+  let mapHTML = '';
+  if (task.map) {
+    mapHTML = `
+      <div class="map-embed-wrapper">
+        <iframe src="https://maps.google.com/maps?q=${encodeURIComponent(task.map)}&output=embed" loading="lazy" allowfullscreen></iframe>
+      </div>
+      <a class="map-open-btn" href="${task.map}" target="_blank" rel="noopener">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        Otwórz w Mapach Google
+      </a>
+    `;
+  }
+
+  // Upload slots HTML
+  let uploadsHTML = '';
+  if (task.choiceTask) {
+    uploadsHTML = `
+      <div>
+        <p style="font-family:'Lato',sans-serif;font-size:0.85rem;color:#888;text-align:center;margin-bottom:12px;letter-spacing:1px;text-transform:uppercase;">Wybierz opcję</p>
+        <div class="options-grid" id="options-grid">
+          <button class="option-btn" onclick="selectOption(this, 1)">Opcja 1</button>
+          <button class="option-btn" onclick="selectOption(this, 2)">Opcja 2</button>
+          <button class="option-btn" onclick="selectOption(this, 3)">Opcja 3</button>
+          <button class="option-btn" onclick="selectOption(this, 4)">Opcja 4</button>
+        </div>
+        <div id="choice-map-reveal" style="display:none;">${mapHTML}</div>
+      </div>
+    `;
+  } else {
+    uploadsHTML = `<div class="upload-section" id="upload-section">`;
+    task.uploads.forEach((slot, idx) => {
+      const isVideo = slot.accept.includes('video');
+      uploadsHTML += `
+        <div>
+          <p class="upload-label">${slot.label}</p>
+          <div class="upload-area" id="upload-area-${idx}" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,${idx},'${slot.key}','${slot.accept}')">
+            <input type="file" accept="${slot.accept}" onchange="onFileChange(event,${idx},'${slot.key}')" id="file-input-${idx}">
+            <span class="upload-icon">${slot.icon}</span>
+            <span class="upload-text">Kliknij lub przeciągnij plik</span>
+            <span class="upload-subtext">${isVideo ? 'MP4, MOV, AVI' : 'JPG, PNG, WEBP, HEIC'}</span>
+          </div>
+          <div id="preview-${idx}" style="display:none;" class="preview-container">
+            <button class="preview-remove" onclick="removeFile(${idx},'${slot.key}')">✕</button>
+          </div>
+        </div>
+      `;
+    });
+    uploadsHTML += `</div>`;
+  }
+
+  wrapper.innerHTML = `
+    <div class="challenge-card">
+      <div class="challenge-number">
+        <span class="challenge-number-badge">${task.id}</span>
+        Wyzwanie
+      </div>
+      <p class="challenge-description">${task.description}</p>
+      ${task.map && !task.choiceTask ? mapHTML : ''}
+    </div>
+    ${uploadsHTML}
+    <button class="submit-btn" id="submit-btn" onclick="submitTask()">
+      <span class="submit-btn-ripple"></span>
+      ${currentTask < getTasks().length - 1 ? 'Prześlij i dalej →' : '🎉 Zakończ przygodę!'}
+    </button>
+  `;
+
+  // Init upload state for this task
+  if (!taskUploads[currentTask]) taskUploads[currentTask] = {};
+  checkSubmitReady();
+}
+
+function onDragOver(e) {
+  e.preventDefault();
+  e.currentTarget.classList.add('dragover');
+}
+
+function onDragLeave(e) {
+  e.currentTarget.classList.remove('dragover');
+}
+
+function onDrop(e, idx, key, accept) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) processFile(file, idx, key);
+}
+
+function onFileChange(e, idx, key) {
+  const file = e.target.files[0];
+  if (file) processFile(file, idx, key);
+}
+
+function processFile(file, idx, key) {
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const dataUrl = e.target.result;
+    const isVideo = file.type.startsWith('video');
+
+    // Store in memory & localStorage
+    if (!taskUploads[currentTask]) taskUploads[currentTask] = {};
+    taskUploads[currentTask][key] = { dataUrl, type: isVideo ? 'video' : 'image', name: file.name };
+
+    const storageKey = `${role}_task_${currentTask + 1}_${key}`;
+    try {
+      localStorage.setItem(storageKey, JSON.stringify({ dataUrl, type: isVideo ? 'video' : 'image' }));
+    } catch(err) {
+      console.warn('LocalStorage full, keeping in memory only');
+    }
+
+    // Show preview
+    const previewDiv = document.getElementById(`preview-${idx}`);
+    previewDiv.style.display = 'flex';
+    previewDiv.innerHTML = `
+      <button class="preview-remove" onclick="removeFile(${idx},'${key}')">✕</button>
+      ${isVideo
+        ? `<video src="${dataUrl}" controls style="max-width:100%;max-height:280px;border-radius:16px;"></video>`
+        : `<img src="${dataUrl}" alt="podgląd" style="max-width:100%;max-height:280px;object-fit:contain;border-radius:16px;">`
+      }
+    `;
+
+    // Hide upload area
+    document.getElementById(`upload-area-${idx}`).style.display = 'none';
+
+    checkSubmitReady();
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeFile(idx, key) {
+  delete taskUploads[currentTask][key];
+  const storageKey = `${role}_task_${currentTask + 1}_${key}`;
+  localStorage.removeItem(storageKey);
+
+  document.getElementById(`preview-${idx}`).style.display = 'none';
+  document.getElementById(`upload-area-${idx}`).style.display = 'block';
+  const fileInput = document.getElementById(`file-input-${idx}`);
+  if (fileInput) fileInput.value = '';
+
+  checkSubmitReady();
+}
+
+function selectOption(btn, num) {
+  document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  taskUploads[currentTask] = { choice: num };
+  localStorage.setItem(`${role}_task_${currentTask + 1}_choice`, num);
+  // Show map
+  const reveal = document.getElementById('choice-map-reveal');
+  if (reveal) reveal.style.display = 'block';
+  checkSubmitReady();
+}
+
+function checkSubmitReady() {
+  const task = getTasks()[currentTask];
+  const btn = document.getElementById('submit-btn');
+  if (!btn) return;
+
+  let ready = false;
+
+  if (task.choiceTask) {
+    ready = taskUploads[currentTask] && taskUploads[currentTask].choice !== undefined;
+  } else {
+    const uploads = taskUploads[currentTask] || {};
+    const requiredKeys = task.uploads.map(u => u.key);
+    ready = requiredKeys.length === 0 || requiredKeys.every(k => uploads[k]);
+  }
+
+  if (ready) {
+    btn.classList.add('enabled');
+  } else {
+    btn.classList.remove('enabled');
+  }
+}
+
+function submitTask() {
+  const btn = document.getElementById('submit-btn');
+  if (!btn.classList.contains('enabled')) return;
+
+  btn.classList.add('loading');
+  btn.textContent = '⏳ Zapisuję…';
+
+  // Simulate upload delay
+  setTimeout(() => {
+    const tasks = getTasks();
+    if (currentTask < tasks.length - 1) {
+      currentTask++;
+      renderChallenge();
+      document.getElementById('screen-challenges').scrollTop = 0;
+      showToast(`Wyzwanie ${currentTask} zaliczone! ✓`);
+    } else {
+      // All done!
+      showScreen('finale');
+      initFinale();
+    }
+  }, 800);
+}
+
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+// ===== FINALE =====
+function getMediaFromStorage(r, taskNum, key) {
+  try {
+    const raw = localStorage.getItem(`${r}_task_${taskNum}_${key}`);
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  // Try memory
+  const idx = taskNum - 1;
+  if (r === role && taskUploads[idx] && taskUploads[idx][key]) {
+    return taskUploads[idx][key];
+  }
+  return null;
+}
+
+function getAllTaskMedia(taskNum) {
+  const items = [];
+  ['her', 'him'].forEach(r => {
+    const tasks = r === 'her' ? tasksHer : tasksHim;
+    const task = tasks[taskNum - 1];
+    if (!task) return;
+    task.uploads.forEach(slot => {
+      const media = getMediaFromStorage(r, taskNum, slot.key);
+      items.push({ media, role: r, taskNum, key: slot.key, label: slot.label });
+    });
+  });
+  return items;
+}
+
+function initFinale() {
+  document.getElementById('finale-date').textContent = '5 Czerwca 2026';
+
+  // Collect all media for hero
+  const allMedia = [];
+  for (let t = 1; t <= 15; t++) {
+    ['her', 'him'].forEach(r => {
+      const tasks = r === 'her' ? tasksHer : tasksHim;
+      const task = tasks[t - 1];
+      task.uploads.forEach(slot => {
+        const media = getMediaFromStorage(r, t, slot.key);
+        if (media && media.type === 'image') allMedia.push(media);
+      });
+    });
+  }
+
+  // Hero slides
+  const heroSlidesEl = document.getElementById('hero-slides');
+  const heroDotsEl = document.getElementById('hero-dots');
+  heroSlidesEl.innerHTML = '';
+  heroDotsEl.innerHTML = '';
+  heroSlides = allMedia.slice(0, 6);
+
+  if (heroSlides.length === 0) {
+    heroSlidesEl.innerHTML = `<div class="hero-slide" style="background:linear-gradient(135deg,#2a1520,#1a0a10);display:flex;align-items:center;justify-content:center;"><span style="font-size:5rem;">💕</span></div>`;
+  } else {
+    heroSlides.forEach((m, i) => {
+      const slide = document.createElement('div');
+      slide.className = 'hero-slide';
+      slide.innerHTML = `<img src="${m.dataUrl}" alt="">`;
+      heroSlidesEl.appendChild(slide);
+      const dot = document.createElement('div');
+      dot.className = 'hero-dot' + (i === 0 ? ' active' : '');
+      dot.onclick = () => goToSlide(i);
+      heroDotsEl.appendChild(dot);
+    });
+
+    if (heroTimer) clearInterval(heroTimer);
+    heroTimer = setInterval(() => {
+      heroSlideIndex = (heroSlideIndex + 1) % heroSlides.length;
+      goToSlide(heroSlideIndex);
+    }, 4000);
+  }
+
+  // Netflix rows
+  const content = document.getElementById('netflix-content');
+  content.innerHTML = '';
+
+  netflixSections.forEach(section => {
+    const rowEl = document.createElement('div');
+    rowEl.className = 'netflix-row';
+
+    let itemsHTML = '';
+    section.tasks.forEach(taskNum => {
+      const items = getAllTaskMedia(taskNum);
+      items.forEach(item => {
+        itemsHTML += renderThumb(item);
+      });
+    });
+
+    if (!itemsHTML) {
+      // Placeholder row
+      for (let i = 0; i < 4; i++) {
+        itemsHTML += renderPlaceholder();
+      }
+    }
+
+    rowEl.innerHTML = `
+      <h3 class="row-title">${section.title}</h3>
+      <div class="row-items">${itemsHTML}</div>
+    `;
+    content.appendChild(rowEl);
+  });
+}
+
+function renderThumb(item) {
+  if (!item.media) return renderPlaceholder();
+  const { dataUrl, type } = item.media;
+  const typeLabel = type === 'video' ? 'VIDEO' : 'FOTO';
+  const mediaEl = type === 'video'
+    ? `<video src="${dataUrl}" preload="metadata" muted></video>`
+    : `<img src="${dataUrl}" alt="moment">`;
+
+  return `
+    <div class="media-thumb" onclick="openLightbox('${dataUrl}','${type}')">
+      ${mediaEl}
+      <div class="play-overlay">
+        <div class="play-icon">
+          ${type === 'video' ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="#333"><polygon points="5 3 19 12 5 21 5 3"/></svg>' : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2"><path d="M1 6s4-6 11-6 11 6 11 6-4 6-11 6S1 6 1 6z"/><circle cx="12" cy="6" r="2"/></svg>'}
+        </div>
+      </div>
+      <span class="media-type-badge">${typeLabel}</span>
+    </div>
+  `;
+}
+
+function renderPlaceholder() {
+  return `
+    <div class="media-thumb">
+      <div class="media-placeholder">
+        <span class="vhs-icon">📼</span>
+        <span class="placeholder-text">Brak nagrania</span>
+      </div>
+    </div>
+  `;
+}
+
+function goToSlide(idx) {
+  heroSlideIndex = idx;
+  document.getElementById('hero-slides').style.transform = `translateX(-${idx * 100}%)`;
+  document.querySelectorAll('.hero-dot').forEach((d, i) => {
+    d.classList.toggle('active', i === idx);
+  });
+}
+
+// ===== LIGHTBOX =====
+function openLightbox(src, type) {
+  const lb = document.getElementById('lightbox');
+  const media = document.getElementById('lightbox-media');
+  media.innerHTML = type === 'video'
+    ? `<video src="${src}" controls autoplay style="max-width:90vw;max-height:90vh;border-radius:12px;"></video>`
+    : `<img src="${src}" alt="" style="max-width:90vw;max-height:90vh;border-radius:12px;object-fit:contain;">`;
+  lb.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox(e) {
+  if (e && e.target !== document.getElementById('lightbox') && !e.target.classList.contains('lightbox-close')) return;
+  const lb = document.getElementById('lightbox');
+  lb.classList.remove('open');
+  lb.querySelector('video')?.pause?.();
+  document.body.style.overflow = '';
+}
+
+// ===== INIT =====
+document.addEventListener('DOMContentLoaded', () => {
+  createPetals();
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
+
+  // Restore role from storage if navigating back
+  const savedRole = localStorage.getItem('adventure_role');
+  if (savedRole) role = savedRole;
+});
+</script>
+</body>
+</html>
