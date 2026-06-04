@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Nasz Wyjątkowy Dzień 💕</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&family=Dancing+Script:wght@600;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+
 <style>
   :root {
     --rose: #c9748a;
@@ -14,12 +18,11 @@
     --gold: #d4a853;
     --netflix-red: #e50914;
     --netflix-dark: #141414;
+    --darker: #0a0407;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
-
   html { scroll-behavior: smooth; }
-
   body {
     font-family: 'Lato', sans-serif;
     min-height: 100vh;
@@ -28,827 +31,341 @@
     background-color: var(--darker);
   }
 
-  /* ===== SCREEN MANAGEMENT =====
-     Each screen is a full page. Only one is visible at a time.
-     No fixed positioning — just show/hide with display.
-  */
-  .screen {
-    display: none;
-    min-height: 100vh;
-    width: 100%;
-  }
-  .screen.active {
-    display: block;
-  }
+  .screen { display: none; min-height: 100vh; width: 100%; }
+  .screen.active { display: block; }
 
-  /* ============================================================
-     SCREEN 1: COUNTDOWN
-  ============================================================ */
+  /* ===== SCREEN 1: COUNTDOWN ===== */
   #screen-countdown {
     background: linear-gradient(160deg, #1a0a10 0%, #2d1520 40%, #0d0510 100%);
-    min-height: 100vh;
-    display: none; /* overridden to flex when .active */
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 40px 20px;
-    position: relative;
-    overflow: hidden;
-    gap: 32px;
+    display: none; flex-direction: column; align-items: center; justify-content: center;
+    padding: 40px 20px; position: relative; overflow: hidden; gap: 32px;
   }
-  #screen-countdown.active {
-    display: flex;
-  }
+  #screen-countdown.active { display: flex; }
 
-  /* Petals */
-  .bg-petals {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    overflow: hidden;
-  }
+  .bg-petals { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
   .petal {
-    position: absolute;
-    width: 8px;
-    height: 12px;
+    position: absolute; width: 8px; height: 12px;
     background: radial-gradient(ellipse, rgba(201,116,138,0.6) 0%, transparent 70%);
-    border-radius: 50% 0 50% 0;
-    animation: fall linear infinite;
+    border-radius: 50% 0 50% 0; animation: fall linear infinite;
   }
   @keyframes fall {
-    0%   { transform: translateY(-20px) rotate(0deg);   opacity: 0; }
+    0%   { transform: translateY(-20px) rotate(0deg); opacity: 0; }
     10%  { opacity: 1; }
     90%  { opacity: 0.5; }
     100% { transform: translateY(110vh) rotate(720deg) translateX(60px); opacity: 0; }
   }
 
-  /* Glow orbs */
   .glow-orb {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.15;
-    animation: pulse-orb 4s ease-in-out infinite;
-    pointer-events: none;
+    position: absolute; border-radius: 50%; filter: blur(80px);
+    opacity: 0.15; animation: pulse-orb 4s ease-in-out infinite; pointer-events: none;
   }
-  .glow-orb-1 { width: 400px; height: 400px; background: var(--rose);       top: -100px; left: -100px; }
-  .glow-orb-2 { width: 300px; height: 300px; background: var(--gold);        bottom: -80px; right: -80px; animation-delay: 2s; }
-  .glow-orb-3 { width: 200px; height: 200px; background: var(--rose-light);  top: 40%; left: 50%; animation-delay: 1s; }
+  .glow-orb-1 { width: 400px; height: 400px; background: var(--rose); top: -100px; left: -100px; }
+  .glow-orb-2 { width: 300px; height: 300px; background: var(--gold); bottom: -80px; right: -80px; animation-delay: 2s; }
+  .glow-orb-3 { width: 200px; height: 200px; background: var(--rose-light); top: 40%; left: 50%; animation-delay: 1s; }
   @keyframes pulse-orb {
-    0%,100% { transform: scale(1);   opacity: 0.15; }
+    0%,100% { transform: scale(1); opacity: 0.15; }
     50%     { transform: scale(1.2); opacity: 0.25; }
   }
 
-  /* Title */
   .countdown-title {
-    font-family: 'Dancing Script', cursive;
-    font-size: clamp(2rem, 7vw, 4rem);
-    color: var(--rose-light);
-    text-shadow: 0 0 30px rgba(201,116,138,0.5);
-    text-align: center;
-    animation: float-title 3s ease-in-out infinite;
-    position: relative;
-    z-index: 2;
+    font-family: 'Dancing Script', cursive; font-size: clamp(2rem, 7vw, 4rem);
+    color: var(--rose-light); text-shadow: 0 0 30px rgba(201,116,138,0.5);
+    text-align: center; animation: float-title 3s ease-in-out infinite; position: relative; z-index: 2;
   }
   .countdown-subtitle {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(0.7rem, 2vw, 1rem);
-    color: rgba(255,255,255,0.45);
-    letter-spacing: 4px;
-    text-transform: uppercase;
-    text-align: center;
-    margin-top: -20px;
-    position: relative;
-    z-index: 2;
+    font-family: 'Playfair Display', serif; font-size: clamp(0.7rem, 2vw, 1rem);
+    color: rgba(255,255,255,0.45); letter-spacing: 4px; text-transform: uppercase;
+    text-align: center; margin-top: -20px; position: relative; z-index: 2;
   }
   @keyframes float-title {
     0%,100% { transform: translateY(0); }
     50%     { transform: translateY(-8px); }
   }
 
-  /* Timer */
-  .timer-container {
-    display: flex;
-    gap: clamp(6px, 2vw, 20px);
-    align-items: flex-start;
-    flex-wrap: nowrap;
-    position: relative;
-    z-index: 2;
-  }
-  .timer-unit {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-  }
+  .timer-container { display: flex; gap: clamp(6px, 2vw, 20px); align-items: flex-start; position: relative; z-index: 2; }
+  .timer-unit { display: flex; flex-direction: column; align-items: center; gap: 8px; }
   .timer-box {
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(201,116,138,0.3);
-    border-radius: 14px;
-    padding: clamp(10px, 2.5vw, 20px) clamp(14px, 3vw, 28px);
-    min-width: clamp(56px, 13vw, 96px);
-    backdrop-filter: blur(10px);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08);
-    position: relative;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(201,116,138,0.3);
+    border-radius: 14px; padding: clamp(10px, 2.5vw, 20px) clamp(14px, 3vw, 28px);
+    min-width: clamp(56px, 13vw, 96px); backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08); position: relative;
   }
   .timer-box::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 1px;
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
     background: linear-gradient(90deg, transparent, rgba(201,116,138,0.5), transparent);
   }
   .timer-number {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(1.8rem, 7vw, 4rem);
-    font-weight: 700;
-    color: #fff;
-    line-height: 1;
-    text-shadow: 0 0 20px rgba(201,116,138,0.4);
-    display: block;
-    text-align: center;
+    font-family: 'Playfair Display', serif; font-size: clamp(1.8rem, 7vw, 4rem);
+    font-weight: 700; color: #fff; line-height: 1; text-shadow: 0 0 20px rgba(201,116,138,0.4); display: block; text-align: center;
   }
-  .timer-label {
-    font-size: clamp(0.5rem, 1.5vw, 0.7rem);
-    color: var(--rose-light);
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    text-align: center;
-  }
-  .timer-sep {
-    font-size: clamp(1.5rem, 5vw, 3rem);
-    color: var(--rose);
-    margin-top: clamp(10px, 2vw, 20px);
-    animation: blink 1s ease-in-out infinite;
-  }
-  @keyframes blink {
-    0%,100% { opacity: 1; }
-    50%     { opacity: 0.2; }
-  }
+  .timer-label { font-size: clamp(0.5rem, 1.5vw, 0.7rem); color: var(--rose-light); letter-spacing: 3px; text-transform: uppercase; text-align: center; }
+  .timer-sep { font-size: clamp(1.5rem, 5vw, 3rem); color: var(--rose); margin-top: clamp(10px, 2vw, 20px); animation: blink 1s ease-in-out infinite; }
+  @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.2; } }
 
-  /* Hearts */
   .hearts-container {
-    display: flex;
-    gap: clamp(16px, 4vw, 40px);
-    opacity: 0;
-    pointer-events: none;
-    transform: translateY(20px);
-    transition: opacity 0.8s ease, transform 0.8s ease;
-    position: relative;
-    z-index: 2;
-    flex-wrap: wrap;
-    justify-content: center;
+    display: flex; gap: clamp(16px, 4vw, 40px); opacity: 0; pointer-events: none;
+    transform: translateY(20px); transition: opacity 0.8s ease, transform 0.8s ease;
+    position: relative; z-index: 2; flex-wrap: wrap; justify-content: center;
   }
-  .hearts-container.visible {
-    opacity: 1;
-    pointer-events: all;
-    transform: translateY(0);
-  }
+  .hearts-container.visible { opacity: 1; pointer-events: all; transform: translateY(0); }
   .heart-btn {
-    position: relative;
-    width: clamp(120px, 28vw, 170px);
-    height: clamp(120px, 28vw, 170px);
-    background: none;
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform 0.3s ease;
+    position: relative; width: clamp(120px, 28vw, 170px); height: clamp(120px, 28vw, 170px);
+    background: none; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.3s ease;
   }
-  .heart-btn:hover  { transform: scale(1.08); }
-  .heart-btn:active { transform: scale(0.96); }
-  .heart-shape {
-    position: absolute;
-    inset: 0;
-  }
-  .heart-shape svg {
-    width: 100%;
-    height: 100%;
-    filter: drop-shadow(0 8px 20px rgba(201,116,138,0.5));
-    transition: filter 0.3s ease;
-  }
-  .heart-btn:hover .heart-shape svg {
-    filter: drop-shadow(0 12px 30px rgba(201,116,138,0.85));
-  }
+  .heart-btn:hover { transform: scale(1.08); }
+  .heart-shape { position: absolute; inset: 0; }
+  .heart-shape svg { width: 100%; height: 100%; filter: drop-shadow(0 8px 20px rgba(201,116,138,0.5)); transition: filter 0.3s ease; }
+  .heart-btn:hover .heart-shape svg { filter: drop-shadow(0 12px 30px rgba(201,116,138,0.85)); }
   .heart-text {
-    position: relative;
-    z-index: 2;
-    font-family: 'Dancing Script', cursive;
-    font-size: clamp(0.8rem, 2.5vw, 1.05rem);
-    color: #fff;
-    text-align: center;
-    text-shadow: 0 1px 4px rgba(0,0,0,0.6);
-    padding: 0 14px;
-    line-height: 1.4;
-    pointer-events: none;
+    position: relative; z-index: 2; font-family: 'Dancing Script', cursive;
+    font-size: clamp(0.8rem, 2.5vw, 1.05rem); color: #fff; text-align: center;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.6); padding: 0 14px; line-height: 1.4; pointer-events: none;
   }
 
-  /* Skip button */
   .skip-btn {
-    position: fixed;
-    bottom: 16px;
-    right: 16px;
-    background: rgba(255,255,255,0.07);
-    border: 1px solid rgba(255,255,255,0.12);
-    color: rgba(255,255,255,0.35);
-    font-family: 'Lato', sans-serif;
-    font-size: 0.65rem;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    padding: 7px 13px;
-    border-radius: 20px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    z-index: 999;
+    position: fixed; bottom: 16px; right: 16px; background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.35); font-family: 'Lato', sans-serif;
+    font-size: 0.65rem; letter-spacing: 2px; text-transform: uppercase; padding: 7px 13px; border-radius: 20px;
+    cursor: pointer; transition: all 0.3s ease; z-index: 999;
   }
-  .skip-btn:hover {
-    background: rgba(255,255,255,0.14);
-    color: rgba(255,255,255,0.65);
-  }
+  .skip-btn:hover { background: rgba(255,255,255,0.14); color: rgba(255,255,255,0.65); }
 
-  /* ============================================================
-     SCREEN 2: INSTRUCTIONS
-  ============================================================ */
+  /* ===== SCREEN 2: INSTRUCTIONS ===== */
   #screen-instructions {
     background: linear-gradient(160deg, #fdf0f3 0%, #fff5f0 50%, #fdf0f3 100%);
-    min-height: 100vh;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 60px 20px 40px;
-    position: relative;
-    overflow: hidden;
+    display: none; align-items: center; justify-content: center; padding: 60px 20px 40px; position: relative; overflow: hidden;
   }
-  #screen-instructions.active {
-    display: flex;
-  }
+  #screen-instructions.active { display: flex; }
 
-  .instr-decor {
-    position: absolute;
-    border-radius: 50%;
-    border: 1px solid rgba(201,116,138,0.12);
-    pointer-events: none;
-  }
+  .instr-decor { position: absolute; border-radius: 50%; border: 1px solid rgba(201,116,138,0.12); pointer-events: none; }
   .instr-decor-1 { width: 600px; height: 600px; top: -200px; left: -200px; }
   .instr-decor-2 { width: 400px; height: 400px; bottom: -150px; right: -100px; }
 
   .instructions-card {
-    background: rgba(255,255,255,0.92);
-    backdrop-filter: blur(20px);
-    border-radius: 28px;
-    padding: clamp(28px, 5vw, 52px);
-    max-width: 620px;
-    width: 100%;
+    background: rgba(255,255,255,0.92); backdrop-filter: blur(20px); border-radius: 28px;
+    padding: clamp(28px, 5vw, 52px); max-width: 620px; width: 100%;
     box-shadow: 0 24px 64px rgba(201,116,138,0.14), 0 2px 4px rgba(0,0,0,0.04);
-    border: 1px solid rgba(201,116,138,0.18);
-    position: relative;
-    z-index: 2;
-    animation: card-pop 0.5s ease;
+    border: 1px solid rgba(201,116,138,0.18); position: relative; z-index: 2; animation: card-pop 0.5s ease;
   }
-  @keyframes card-pop {
-    from { opacity: 0; transform: translateY(24px) scale(0.97); }
-    to   { opacity: 1; transform: translateY(0)   scale(1); }
-  }
+  @keyframes card-pop { from { opacity: 0; transform: translateY(24px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
   .instructions-card::before {
-    content: '♡';
-    position: absolute;
-    top: -16px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 1.8rem;
-    color: var(--rose);
-    background: linear-gradient(160deg, #fdf0f3, #fff5f0);
-    padding: 0 10px;
-    line-height: 1;
+    content: '♡'; position: absolute; top: -16px; left: 50%; transform: translateX(-50%);
+    font-size: 1.8rem; color: var(--rose); background: linear-gradient(160deg, #fdf0f3, #fff5f0); padding: 0 10px; line-height: 1;
   }
-  .instructions-title {
-    font-family: 'Dancing Script', cursive;
-    font-size: clamp(1.8rem, 5vw, 2.8rem);
-    color: var(--rose-dark);
-    text-align: center;
-    margin-bottom: 28px;
-  }
-  .instructions-list {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    margin-bottom: 36px;
-  }
-  .instructions-list li {
-    display: flex;
-    gap: 14px;
-    align-items: flex-start;
-    font-size: clamp(0.82rem, 2vw, 0.95rem);
-    color: #555;
-    line-height: 1.65;
-  }
+  .instructions-title { font-family: 'Dancing Script', cursive; font-size: clamp(1.8rem, 5vw, 2.8rem); color: var(--rose-dark); text-align: center; margin-bottom: 28px; }
+  .instructions-list { list-style: none; display: flex; flex-direction: column; gap: 14px; margin-bottom: 36px; }
+  .instructions-list li { display: flex; gap: 14px; align-items: flex-start; font-size: clamp(0.82rem, 2vw, 0.95rem); color: #555; line-height: 1.65; }
   .rule-num {
-    flex-shrink: 0;
-    width: 26px; height: 26px;
-    background: linear-gradient(135deg, var(--rose), var(--rose-dark));
-    color: #fff;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 0.7rem; font-weight: 700;
-    margin-top: 2px;
+    flex-shrink: 0; width: 26px; height: 26px; background: linear-gradient(135deg, var(--rose), var(--rose-dark));
+    color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; margin-top: 2px;
   }
   .ready-btn {
-    display: block; width: 100%;
-    padding: 17px;
-    background: linear-gradient(135deg, var(--rose), var(--rose-dark));
-    color: #fff; border: none; border-radius: 14px;
-    font-family: 'Dancing Script', cursive; font-size: 1.35rem;
-    cursor: pointer; letter-spacing: 1px;
-    box-shadow: 0 8px 24px rgba(201,116,138,0.4);
-    transition: transform 0.3s, box-shadow 0.3s;
+    display: block; width: 100%; padding: 17px; background: linear-gradient(135deg, var(--rose), var(--rose-dark));
+    color: #fff; border: none; border-radius: 14px; font-family: 'Dancing Script', cursive; font-size: 1.35rem;
+    cursor: pointer; letter-spacing: 1px; box-shadow: 0 8px 24px rgba(201,116,138,0.4); transition: transform 0.3s, box-shadow 0.3s;
   }
-  .ready-btn:hover  { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(201,116,138,0.55); }
-  .ready-btn:active { transform: translateY(0); }
+  .ready-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(201,116,138,0.55); }
 
-  /* ============================================================
-     SCREEN 3: CHALLENGES
-  ============================================================ */
-  #screen-challenges {
-    background: linear-gradient(160deg, #fdf0f3 0%, #fff8f5 100%);
-    min-height: 100vh;
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    padding: 16px 16px 48px;
-  }
-  #screen-challenges.active {
-    display: flex;
-  }
+  /* ===== SCREEN 3: CHALLENGES ===== */
+  #screen-challenges { background: linear-gradient(160deg, #fdf0f3 0%, #fff8f5 100%); display: none; flex-direction: column; align-items: center; padding: 16px 16px 48px; }
+  #screen-challenges.active { display: flex; }
 
-  /* sticky progress header */
   .challenges-header {
-    width: 100%;
-    max-width: 660px;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    background: rgba(253,240,243,0.92);
-    backdrop-filter: blur(8px);
-    padding: 14px 0 0;
-    margin-bottom: 20px;
+    width: 100%; max-width: 660px; position: sticky; top: 0; z-index: 10;
+    background: rgba(253,240,243,0.92); backdrop-filter: blur(8px); padding: 14px 0 0; margin-bottom: 20px;
   }
-  .header-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-bottom: 10px;
-  }
-  .progress-info {
-    font-family: 'Lato', sans-serif;
-    font-size: 0.75rem;
-    color: var(--rose);
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    font-weight: 700;
-  }
-  .progress-bar {
-    height: 3px;
-    background: rgba(201,116,138,0.15);
-    border-radius: 2px;
-    overflow: hidden;
-  }
-  .progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--rose-light), var(--rose));
-    border-radius: 2px;
-    transition: width 0.6s ease;
-  }
+  .header-row { display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; }
+  .progress-info { font-family: 'Lato', sans-serif; font-size: 0.75rem; color: var(--rose); letter-spacing: 2px; text-transform: uppercase; font-weight: 700; }
+  .progress-bar { height: 3px; background: rgba(201,116,138,0.15); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--rose-light), var(--rose)); border-radius: 2px; transition: width 0.6s ease; }
 
-  .challenge-area {
-    width: 100%;
-    max-width: 660px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-
-  /* Challenge card */
+  .challenge-area { width: 100%; max-width: 660px; display: flex; flex-direction: column; gap: 20px; }
   .challenge-card {
-    background: #fff;
-    border-radius: 24px;
-    padding: clamp(20px, 4vw, 36px);
+    background: #fff; border-radius: 24px; padding: clamp(20px, 4vw, 36px);
     box-shadow: 0 16px 48px rgba(201,116,138,0.13), 0 3px 8px rgba(0,0,0,0.04);
-    border: 1px solid rgba(201,116,138,0.07);
-    position: relative;
-    overflow: hidden;
-    animation: card-enter 0.4s ease;
+    border: 1px solid rgba(201,116,138,0.07); position: relative; overflow: hidden; animation: card-enter 0.4s ease;
   }
-  @keyframes card-enter {
-    from { opacity: 0; transform: translateY(20px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
+  @keyframes card-enter { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
   .challenge-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0; height: 4px;
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
     background: linear-gradient(90deg, var(--rose-light), var(--rose), var(--rose-dark));
   }
-  .challenge-num-row {
-    display: flex; align-items: center; gap: 8px;
-    font-size: 0.68rem; letter-spacing: 3px; text-transform: uppercase;
-    color: var(--rose); font-weight: 700; margin-bottom: 14px;
-  }
-  .num-badge {
-    width: 22px; height: 22px;
-    background: linear-gradient(135deg, var(--rose), var(--rose-dark));
-    color: #fff; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 0.65rem; font-weight: 700;
-  }
-  .challenge-desc {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(0.95rem, 2.5vw, 1.18rem);
-    color: #2a1520;
-    line-height: 1.75;
-  }
+  .challenge-num-row { display: flex; align-items: center; gap: 8px; font-size: 0.68rem; letter-spacing: 3px; text-transform: uppercase; color: var(--rose); font-weight: 700; margin-bottom: 14px; }
+  .num-badge { width: 22px; height: 22px; background: linear-gradient(135deg, var(--rose), var(--rose-dark)); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700; }
+  .challenge-desc { font-family: 'Playfair Display', serif; font-size: clamp(0.95rem, 2.5vw, 1.18rem); color: #2a1520; line-height: 1.75; }
 
-  /* Map */
-  .map-wrap {
-    border-radius: 16px; overflow: hidden;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
-    margin-top: 16px;
-  }
+  .map-wrap { border-radius: 16px; overflow: hidden; box-shadow: 0 6px 20px rgba(0,0,0,0.1); margin-top: 16px; }
   .map-wrap iframe { width: 100%; height: 200px; border: none; display: block; }
   .map-btn {
-    display: inline-flex; align-items: center; gap: 8px;
-    padding: 12px 18px; margin-top: 12px;
-    background: linear-gradient(135deg, #4285f4, #1a73e8);
-    color: #fff; border: none; border-radius: 12px;
-    font-family: 'Lato', sans-serif; font-size: 0.85rem; font-weight: 700;
-    cursor: pointer; text-decoration: none;
-    box-shadow: 0 4px 14px rgba(66,133,244,0.3);
-    transition: transform 0.2s, box-shadow 0.2s;
+    display: inline-flex; align-items: center; gap: 8px; padding: 12px 18px; margin-top: 12px;
+    background: linear-gradient(135deg, #4285f4, #1a73e8); color: #fff; border: none; border-radius: 12px;
+    font-family: 'Lato', sans-serif; font-size: 0.85rem; font-weight: 700; cursor: pointer; text-decoration: none;
+    box-shadow: 0 4px 14px rgba(66,133,244,0.3); transition: transform 0.2s, box-shadow 0.2s;
   }
   .map-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(66,133,244,0.4); }
 
-  /* Upload */
   .upload-section { display: flex; flex-direction: column; gap: 14px; }
   .upload-block { display: flex; flex-direction: column; gap: 8px; }
-  .upload-label-txt {
-    font-size: 0.75rem; color: #999;
-    letter-spacing: 1px; text-transform: uppercase; font-weight: 600;
-  }
+  .upload-label-txt { font-size: 0.75rem; color: #999; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; }
   .upload-zone {
-    position: relative;
-    border: 2px dashed rgba(201,116,138,0.3);
-    border-radius: 18px;
-    padding: 28px 20px;
-    text-align: center;
-    cursor: pointer;
-    background: rgba(201,116,138,0.025);
-    transition: border-color 0.2s, background 0.2s, transform 0.2s;
+    position: relative; border: 2px dashed rgba(201,116,138,0.3); border-radius: 18px; padding: 28px 20px;
+    text-align: center; cursor: pointer; background: rgba(201,116,138,0.025); transition: border-color 0.2s, background 0.2s, transform 0.2s;
   }
-  .upload-zone:hover, .upload-zone.over {
-    border-color: var(--rose);
-    background: rgba(201,116,138,0.06);
-    transform: scale(1.01);
-  }
-  .upload-zone input[type="file"] {
-    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
-  }
-  .upload-zone-icon  { font-size: 2.2rem; display: block; margin-bottom: 8px; }
-  .upload-zone-main  { font-weight: 700; color: var(--rose); font-size: 0.88rem; display: block; }
-  .upload-zone-sub   { font-size: 0.72rem; color: #bbb; margin-top: 2px; display: block; }
+  .upload-zone:hover, .upload-zone.over { border-color: var(--rose); background: rgba(201,116,138,0.06); transform: scale(1.01); }
+  .upload-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+  .upload-zone-icon { font-size: 2.2rem; display: block; margin-bottom: 8px; }
+  .upload-zone-main { font-weight: 700; color: var(--rose); font-size: 0.88rem; display: block; }
+  .upload-zone-sub { font-size: 0.72rem; color: #bbb; margin-top: 2px; display: block; }
+  
+  /* Loading state inside upload zone */
+  .upload-zone.loading { border-style: solid; background: rgba(201,116,138,0.1); pointer-events: none; }
+  .upload-zone.loading .upload-zone-icon { animation: pulse-orb 1s infinite; }
 
-  .preview-wrap {
-    border-radius: 14px; overflow: hidden;
-    background: #111; position: relative;
-    display: none;
-    max-height: 260px;
-    align-items: center; justify-content: center;
-  }
+  .preview-wrap { border-radius: 14px; overflow: hidden; background: #111; position: relative; display: none; max-height: 260px; align-items: center; justify-content: center; }
   .preview-wrap.show { display: flex; }
-  .preview-wrap img  { max-width: 100%; max-height: 260px; object-fit: contain; }
-  .preview-wrap video{ max-width: 100%; max-height: 260px; }
+  .preview-wrap img { max-width: 100%; max-height: 260px; object-fit: contain; }
+  .preview-wrap video { max-width: 100%; max-height: 260px; }
   .preview-rm {
-    position: absolute; top: 8px; right: 8px;
-    width: 28px; height: 28px;
-    background: rgba(0,0,0,0.6); border: none; border-radius: 50%;
-    color: #fff; font-size: 0.8rem; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: background 0.2s;
-    z-index: 2;
+    position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; background: rgba(0,0,0,0.6);
+    border: none; border-radius: 50%; color: #fff; font-size: 0.8rem; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; transition: background 0.2s; z-index: 2;
   }
   .preview-rm:hover { background: rgba(200,30,30,0.8); }
 
-  /* Choice task */
   .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .option-btn {
-    padding: 14px;
-    background: rgba(201,116,138,0.05);
-    border: 2px solid rgba(201,116,138,0.2);
-    border-radius: 12px;
-    font-family: 'Playfair Display', serif;
-    font-size: 0.95rem; color: var(--rose-dark);
-    cursor: pointer; text-align: center;
-    transition: all 0.25s;
+    padding: 14px; background: rgba(201,116,138,0.05); border: 2px solid rgba(201,116,138,0.2);
+    border-radius: 12px; font-family: 'Playfair Display', serif; font-size: 0.95rem; color: var(--rose-dark);
+    cursor: pointer; text-align: center; transition: all 0.25s;
   }
-  .option-btn:hover   { background: rgba(201,116,138,0.1); border-color: var(--rose); }
-  .option-btn.picked  {
-    background: linear-gradient(135deg, var(--rose), var(--rose-dark));
-    border-color: var(--rose-dark); color: #fff;
-    box-shadow: 0 6px 18px rgba(201,116,138,0.4);
-  }
+  .option-btn:hover { background: rgba(201,116,138,0.1); border-color: var(--rose); }
+  .option-btn.picked { background: linear-gradient(135deg, var(--rose), var(--rose-dark)); border-color: var(--rose-dark); color: #fff; box-shadow: 0 6px 18px rgba(201,116,138,0.4); }
 
-  /* Submit */
   .submit-btn {
-    width: 100%; padding: 17px;
-    background: linear-gradient(135deg, var(--rose), var(--rose-dark));
-    color: #fff; border: none; border-radius: 14px;
-    font-family: 'Dancing Script', cursive; font-size: 1.35rem;
-    cursor: pointer; letter-spacing: 1px;
-    box-shadow: 0 8px 24px rgba(201,116,138,0.38);
-    transition: all 0.35s;
-    opacity: 0.38; pointer-events: none;
-    position: relative; overflow: hidden;
+    width: 100%; padding: 17px; background: linear-gradient(135deg, var(--rose), var(--rose-dark));
+    color: #fff; border: none; border-radius: 14px; font-family: 'Dancing Script', cursive; font-size: 1.35rem;
+    cursor: pointer; letter-spacing: 1px; box-shadow: 0 8px 24px rgba(201,116,138,0.38); transition: all 0.35s;
+    opacity: 0.38; pointer-events: none; position: relative; overflow: hidden;
   }
   .submit-btn.on { opacity: 1; pointer-events: all; }
-  .submit-btn.on:hover  { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(201,116,138,0.55); }
-  .submit-btn.on:active { transform: translateY(0); }
+  .submit-btn.on:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(201,116,138,0.55); }
 
-  /* ============================================================
-     SCREEN 4: FINALE (Netflix)
-  ============================================================ */
-  #screen-finale {
-    background: var(--netflix-dark);
-    min-height: 100vh;
-    display: none;
-    flex-direction: column;
-  }
+  /* ===== SCREEN 4: FINALE ===== */
+  #screen-finale { background: var(--netflix-dark); display: none; flex-direction: column; }
   #screen-finale.active { display: flex; }
-
-  /* Header */
   .nf-header {
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    padding: clamp(12px,3vw,20px) clamp(16px,4vw,52px);
-    display: flex; align-items: center; justify-content: space-between;
-    z-index: 10;
-    background: linear-gradient(to bottom, rgba(20,20,20,0.9), transparent);
+    position: absolute; top: 0; left: 0; right: 0; padding: clamp(12px,3vw,20px) clamp(16px,4vw,52px);
+    display: flex; align-items: center; justify-content: space-between; z-index: 10; background: linear-gradient(to bottom, rgba(20,20,20,0.9), transparent);
   }
-  .nf-logo {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(1.2rem,3vw,1.8rem);
-    font-weight: 700; color: var(--netflix-red);
-    letter-spacing: 2px;
-  }
-  .nf-date {
-    font-size: 0.72rem; color: rgba(255,255,255,0.45);
-    letter-spacing: 2px; text-transform: uppercase;
-  }
+  .nf-logo { font-family: 'Playfair Display', serif; font-size: clamp(1.2rem,3vw,1.8rem); font-weight: 700; color: var(--netflix-red); letter-spacing: 2px; }
+  .nf-date { font-size: 0.72rem; color: rgba(255,255,255,0.45); letter-spacing: 2px; text-transform: uppercase; }
 
-  /* Hero */
-  .hero-banner {
-    position: relative; width: 100%;
-    height: clamp(300px, 52vw, 500px);
-    overflow: hidden; background: #000; flex-shrink: 0;
-  }
-  .hero-slides {
-    display: flex; height: 100%;
-    transition: transform 0.8s cubic-bezier(0.25,0.46,0.45,0.94);
-  }
+  .hero-banner { position: relative; width: 100%; height: clamp(300px, 52vw, 500px); overflow: hidden; background: #000; flex-shrink: 0; }
+  .hero-slides { display: flex; height: 100%; transition: transform 0.8s cubic-bezier(0.25,0.46,0.45,0.94); }
   .hero-slide { flex-shrink: 0; width: 100%; height: 100%; }
-  .hero-slide img, .hero-slide video {
-    width: 100%; height: 100%; object-fit: cover;
-  }
+  .hero-slide img, .hero-slide video { width: 100%; height: 100%; object-fit: cover; }
   .hero-grad {
     position: absolute; inset: 0;
     background: linear-gradient(to bottom, rgba(20,20,20,0.1) 0%, rgba(20,20,20,0) 30%, rgba(20,20,20,0.65) 70%, var(--netflix-dark) 100%),
                 linear-gradient(to right, rgba(20,20,20,0.7) 0%, transparent 55%);
   }
-  .hero-content {
-    position: absolute;
-    bottom: clamp(24px,5vw,72px);
-    left: clamp(16px,4vw,52px);
-    z-index: 5;
-  }
-  .hero-title {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(1.8rem,6vw,4rem);
-    font-weight: 700; color: #fff;
-    text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
-    line-height: 1.1; margin-bottom: 10px;
-  }
-  .hero-sub {
-    font-family: 'Dancing Script', cursive;
-    font-size: clamp(0.95rem,2.5vw,1.5rem);
-    color: rgba(255,255,255,0.65);
-  }
-  .hero-dots {
-    position: absolute; bottom: 18px; right: 24px;
-    display: flex; gap: 7px;
-  }
-  .hero-dot {
-    width: 7px; height: 7px; border-radius: 50%;
-    background: rgba(255,255,255,0.3); cursor: pointer;
-    transition: all 0.3s;
-  }
+  .hero-content { position: absolute; bottom: clamp(24px,5vw,72px); left: clamp(16px,4vw,52px); z-index: 5; }
+  .hero-title { font-family: 'Playfair Display', serif; font-size: clamp(1.8rem,6vw,4rem); font-weight: 700; color: #fff; text-shadow: 2px 2px 8px rgba(0,0,0,0.5); line-height: 1.1; margin-bottom: 10px; }
+  .hero-sub { font-family: 'Dancing Script', cursive; font-size: clamp(0.95rem,2.5vw,1.5rem); color: rgba(255,255,255,0.65); }
+  .hero-dots { position: absolute; bottom: 18px; right: 24px; display: flex; gap: 7px; }
+  .hero-dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.3); cursor: pointer; transition: all 0.3s; }
   .hero-dot.on { background: #fff; transform: scale(1.35); }
 
-  /* Rows */
   .nf-content { padding: clamp(8px,2vw,24px) 0 40px; }
-  .nf-row     { margin-bottom: clamp(18px,3vw,36px); }
-  .row-title  {
-    font-family: 'Lato', sans-serif;
-    font-size: clamp(0.95rem,2.2vw,1.25rem);
-    font-weight: 700; color: #e5e5e5;
-    padding: 0 clamp(14px,3vw,48px);
-    margin-bottom: 10px; letter-spacing: 0.5px;
-  }
-  .row-items {
-    display: flex; gap: 7px;
-    padding: 6px clamp(14px,3vw,48px);
-    overflow-x: auto; scrollbar-width: none;
-    -ms-overflow-style: none; scroll-behavior: smooth;
-  }
+  .nf-row { margin-bottom: clamp(18px,3vw,36px); }
+  .row-title { font-family: 'Lato', sans-serif; font-size: clamp(0.95rem,2.2vw,1.25rem); font-weight: 700; color: #e5e5e5; padding: 0 clamp(14px,3vw,48px); margin-bottom: 10px; letter-spacing: 0.5px; }
+  .row-items { display: flex; gap: 7px; padding: 6px clamp(14px,3vw,48px); overflow-x: auto; scrollbar-width: none; scroll-behavior: smooth; }
   .row-items::-webkit-scrollbar { display: none; }
 
-  /* Thumb */
   .media-thumb {
-    flex-shrink: 0;
-    width: clamp(130px,20vw,220px);
-    height: clamp(82px,13vw,140px);
-    border-radius: 7px; overflow: hidden;
-    cursor: pointer; position: relative;
-    background: #2a2a2a;
-    transition: transform 0.3s, box-shadow 0.3s;
+    flex-shrink: 0; width: clamp(130px,20vw,220px); height: clamp(82px,13vw,140px);
+    border-radius: 7px; overflow: hidden; cursor: pointer; position: relative; background: #2a2a2a; transition: transform 0.3s, box-shadow 0.3s;
   }
   .media-thumb:hover { transform: scale(1.06); box-shadow: 0 8px 24px rgba(0,0,0,0.6); z-index: 2; }
   .media-thumb img, .media-thumb video { width: 100%; height: 100%; object-fit: cover; }
-  .thumb-overlay {
-    position: absolute; inset: 0;
-    background: rgba(0,0,0,0);
-    display: flex; align-items: center; justify-content: center;
-    transition: background 0.3s;
-  }
+  .thumb-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0); display: flex; align-items: center; justify-content: center; transition: background 0.3s; }
   .media-thumb:hover .thumb-overlay { background: rgba(0,0,0,0.3); }
-  .play-icon {
-    width: 42px; height: 42px;
-    background: rgba(255,255,255,0.85); border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    opacity: 0; transform: scale(0.8);
-    transition: all 0.3s;
-  }
+  .play-icon { width: 42px; height: 42px; background: rgba(255,255,255,0.85); border-radius: 50%; display: flex; align-items: center; justify-content: center; opacity: 0; transform: scale(0.8); transition: all 0.3s; }
   .media-thumb:hover .play-icon { opacity: 1; transform: scale(1); }
-  .type-badge {
-    position: absolute; bottom: 5px; left: 5px;
-    background: rgba(0,0,0,0.7); color: #fff;
-    font-size: 0.55rem; padding: 2px 5px; border-radius: 3px;
-    letter-spacing: 1px; text-transform: uppercase;
-    font-family: 'Lato', sans-serif; font-weight: 700;
-  }
+  .type-badge { position: absolute; bottom: 5px; left: 5px; background: rgba(0,0,0,0.7); color: #fff; font-size: 0.55rem; padding: 2px 5px; border-radius: 3px; letter-spacing: 1px; text-transform: uppercase; font-family: 'Lato', sans-serif; font-weight: 700; }
 
-  /* Placeholder */
-  .media-ph {
-    width: 100%; height: 100%;
-    background: linear-gradient(135deg, #1c1c2e, #2a1a2e);
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center; gap: 6px;
-  }
+  .media-ph { width: 100%; height: 100%; background: linear-gradient(135deg, #1c1c2e, #2a1a2e); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; }
   .ph-icon { font-size: 1.8rem; opacity: 0.35; }
-  .ph-txt  { font-size: 0.55rem; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.2); }
+  .ph-txt { font-size: 0.55rem; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.2); }
 
-  /* Lightbox */
-  .lightbox {
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,0.96);
-    z-index: 9999;
-    display: none; align-items: center; justify-content: center;
-  }
+  .lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.96); z-index: 9999; display: none; align-items: center; justify-content: center; }
   .lightbox.open { display: flex; }
-  .lb-close {
-    position: absolute; top: 18px; right: 22px;
-    background: none; border: none;
-    color: rgba(255,255,255,0.65); font-size: 2rem;
-    cursor: pointer; transition: color 0.2s; z-index: 2;
-  }
+  .lb-close { position: absolute; top: 18px; right: 22px; background: none; border: none; color: rgba(255,255,255,0.65); font-size: 2rem; cursor: pointer; transition: color 0.2s; z-index: 2; }
   .lb-close:hover { color: #fff; }
-  .lb-media img, .lb-media video {
-    max-width: 92vw; max-height: 90vh;
-    border-radius: 10px; object-fit: contain;
-  }
+  .lb-media img, .lb-media video { max-width: 92vw; max-height: 90vh; border-radius: 10px; object-fit: contain; }
 
-  /* Finale footer */
-  .nf-footer {
-    text-align: center; padding: 32px 20px;
-    border-top: 1px solid rgba(255,255,255,0.05);
-  }
-  .nf-footer p {
-    font-family: 'Dancing Script', cursive;
-    font-size: clamp(1.1rem,3vw,1.7rem);
-    color: rgba(255,255,255,0.35);
-  }
+  .nf-footer { text-align: center; padding: 32px 20px; border-top: 1px solid rgba(255,255,255,0.05); }
+  .nf-footer p { font-family: 'Dancing Script', cursive; font-size: clamp(1.1rem,3vw,1.7rem); color: rgba(255,255,255,0.35); }
 
-  /* Toast */
   .toast {
-    position: fixed; bottom: 28px; left: 50%;
-    transform: translateX(-50%) translateY(80px);
-    background: linear-gradient(135deg, var(--rose), var(--rose-dark));
-    color: #fff; padding: 12px 26px; border-radius: 40px;
-    font-family: 'Lato', sans-serif; font-size: 0.87rem; font-weight: 700;
-    box-shadow: 0 8px 24px rgba(201,116,138,0.5);
-    z-index: 8888; pointer-events: none; white-space: nowrap;
-    transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(80px);
+    background: linear-gradient(135deg, var(--rose), var(--rose-dark)); color: #fff; padding: 12px 26px; border-radius: 40px;
+    font-family: 'Lato', sans-serif; font-size: 0.87rem; font-weight: 700; box-shadow: 0 8px 24px rgba(201,116,138,0.5);
+    z-index: 8888; pointer-events: none; white-space: nowrap; transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
   }
   .toast.show { transform: translateX(-50%) translateY(0); }
-
-  /* Responsive tweaks */
-  @media (max-width: 400px) {
-    .options-grid { grid-template-columns: 1fr; }
-  }
 </style>
 </head>
 <body>
 
-<!-- ====================================================
-     SCREEN 1: COUNTDOWN
-==================================================== -->
 <div id="screen-countdown" class="screen active">
   <div class="bg-petals" id="petals-container"></div>
   <div class="glow-orb glow-orb-1"></div>
   <div class="glow-orb glow-orb-2"></div>
   <div class="glow-orb glow-orb-3"></div>
 
-  <h1 class="countdown-title">Nasz Wyjątkowy Dzień</h1>
+  <h1 class="countdown-title">Loveflix</h1>
   <p class="countdown-subtitle">5 Czerwca 2026 · 13:00</p>
 
   <div class="timer-container">
-    <div class="timer-unit">
-      <div class="timer-box"><span class="timer-number" id="days">00</span></div>
-      <span class="timer-label">Dni</span>
-    </div>
-    <span class="timer-sep">:</span>
-    <div class="timer-unit">
-      <div class="timer-box"><span class="timer-number" id="hours">00</span></div>
-      <span class="timer-label">Godziny</span>
-    </div>
-    <span class="timer-sep">:</span>
-    <div class="timer-unit">
-      <div class="timer-box"><span class="timer-number" id="minutes">00</span></div>
-      <span class="timer-label">Minuty</span>
-    </div>
-    <span class="timer-sep">:</span>
-    <div class="timer-unit">
-      <div class="timer-box"><span class="timer-number" id="seconds">00</span></div>
-      <span class="timer-label">Sekundy</span>
-    </div>
+    <div class="timer-unit"><div class="timer-box"><span class="timer-number" id="days">00</span></div><span class="timer-label">Dni</span></div><span class="timer-sep">:</span>
+    <div class="timer-unit"><div class="timer-box"><span class="timer-number" id="hours">00</span></div><span class="timer-label">Godziny</span></div><span class="timer-sep">:</span>
+    <div class="timer-unit"><div class="timer-box"><span class="timer-number" id="minutes">00</span></div><span class="timer-label">Minuty</span></div><span class="timer-sep">:</span>
+    <div class="timer-unit"><div class="timer-box"><span class="timer-number" id="seconds">00</span></div><span class="timer-label">Sekundy</span></div>
   </div>
 
   <div class="hearts-container" id="hearts-container">
     <button class="heart-btn" onclick="selectRole('her')">
       <span class="heart-shape">
         <svg viewBox="0 0 200 180" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <radialGradient id="hg1" cx="40%" cy="35%" r="60%">
-              <stop offset="0%" stop-color="#f0a0b5"/>
-              <stop offset="100%" stop-color="#8b3a5c"/>
-            </radialGradient>
-          </defs>
+          <defs><radialGradient id="hg1" cx="40%" cy="35%" r="60%"><stop offset="0%" stop-color="#f0a0b5"/><stop offset="100%" stop-color="#8b3a5c"/></radialGradient></defs>
           <path d="M100 158 C100 158 20 110 20 65 C20 40 38 22 60 22 C76 22 90 30 100 42 C110 30 124 22 140 22 C162 22 180 40 180 65 C180 110 100 158 100 158Z" fill="url(#hg1)" filter="drop-shadow(0 4px 12px rgba(201,116,138,0.6))"/>
         </svg>
       </span>
       <span class="heart-text">Gotowa na<br>przygodę</span>
     </button>
-
     <button class="heart-btn" onclick="selectRole('him')">
       <span class="heart-shape">
         <svg viewBox="0 0 200 180" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <radialGradient id="hg2" cx="40%" cy="35%" r="60%">
-              <stop offset="0%" stop-color="#f0c860"/>
-              <stop offset="100%" stop-color="#8b6a20"/>
-            </radialGradient>
-          </defs>
+          <defs><radialGradient id="hg2" cx="40%" cy="35%" r="60%"><stop offset="0%" stop-color="#f0c860"/><stop offset="100%" stop-color="#8b6a20"/></radialGradient></defs>
           <path d="M100 158 C100 158 20 110 20 65 C20 40 38 22 60 22 C76 22 90 30 100 42 C110 30 124 22 140 22 C162 22 180 40 180 65 C180 110 100 158 100 158Z" fill="url(#hg2)" filter="drop-shadow(0 4px 12px rgba(212,168,83,0.6))"/>
         </svg>
       </span>
       <span class="heart-text">Gotowy na<br>przygodę</span>
     </button>
   </div>
-
   <button class="skip-btn" onclick="skipCountdown()">Skip Countdown</button>
 </div>
 
-<!-- ====================================================
-     SCREEN 2: INSTRUCTIONS
-==================================================== -->
 <div id="screen-instructions" class="screen">
-  <div class="instr-decor instr-decor-1"></div>
-  <div class="instr-decor instr-decor-2"></div>
+  <div class="instr-decor instr-decor-1"></div><div class="instr-decor instr-decor-2"></div>
   <div class="instructions-card">
     <h2 class="instructions-title">Lista Zasad</h2>
     <ol class="instructions-list">
       <li><span class="rule-num">1</span><span>Przygotowałem dla nas na dzisiaj kilka wyzwań.</span></li>
       <li><span class="rule-num">2</span><span>Ze względu na dzisiejszy wyjątkowy dzień przygotowałem kilka niespodzianek, a na tej stronie będziesz się dowiadywała/dowiadywał jakie.</span></li>
       <li><span class="rule-num">3</span><span>Zaraz przejdziemy na pierwszą stronę z wyzwaniem — będzie to zrobienie makijażu i dobór ubioru ze szczegółami.</span></li>
-      <li><span class="rule-num">4</span><span>Wykonanie zadania musisz potwierdzić za pomocą zdjęcia lub nagrania wideo według instrukcji.</span></li>
+      <li><span class="rule-num">4</span><span>Wykonanie zadania musisz potwierdzić za pomocą zdjęcia lub nagrania wideo. Pliki zapisują się w naszej wspólnej bazie!</span></li>
       <li><span class="rule-num">5</span><span>Gra ma urozmaicić ci dzień, ale jeśli wykonasz wszystkie zadania to na koniec odblokujesz dodatkowy prezent.</span></li>
       <li><span class="rule-num">6</span><span>Ja również będę wykonywać wyzwania.</span></li>
     </ol>
@@ -856,34 +373,22 @@
   </div>
 </div>
 
-<!-- ====================================================
-     SCREEN 3: CHALLENGES
-==================================================== -->
 <div id="screen-challenges" class="screen">
   <div class="challenges-header">
     <div class="header-row">
-      <span class="progress-info" id="progress-text">Wyzwanie 1 z 15</span>
+      <span class="progress-info" id="progress-text">Wyzwanie 1 z 11</span>
       <span class="progress-info" id="role-badge">♀ Her</span>
     </div>
-    <div class="progress-bar">
-      <div class="progress-fill" id="progress-fill" style="width:6.6%"></div>
-    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:9%"></div></div>
   </div>
-
-  <div class="challenge-area" id="challenge-area">
-    <!-- injected by JS -->
-  </div>
+  <div class="challenge-area" id="challenge-area"></div>
 </div>
 
-<!-- ====================================================
-     SCREEN 4: FINALE
-==================================================== -->
 <div id="screen-finale" class="screen">
   <div class="nf-header">
-    <span class="nf-logo">MEMORIES</span>
+    <span class="nf-logo">LOVEFLIX</span>
     <span class="nf-date">5 Czerwca 2026</span>
   </div>
-
   <div class="hero-banner">
     <div class="hero-slides" id="hero-slides"></div>
     <div class="hero-grad"></div>
@@ -893,282 +398,167 @@
     </div>
     <div class="hero-dots" id="hero-dots"></div>
   </div>
-
   <div class="nf-content" id="nf-content"></div>
-
-  <div class="nf-footer">
-    <p>Dziękuję, że jesteś częścią mojego życia ♡</p>
-  </div>
+  <div class="nf-footer"><p>Dziękuję, że jesteś częścią mojego życia ♡</p></div>
 </div>
 
-<!-- LIGHTBOX -->
-<div class="lightbox" id="lightbox">
-  <button class="lb-close" onclick="closeLb()">✕</button>
-  <div class="lb-media" id="lb-media"></div>
-</div>
-
-<!-- TOAST -->
+<div class="lightbox" id="lightbox"><button class="lb-close" onclick="closeLb()">✕</button><div class="lb-media" id="lb-media"></div></div>
 <div class="toast" id="toast"></div>
 
-<!-- ====================================================
-     JAVASCRIPT
-==================================================== -->
 <script>
+// ─── FIREBASE SETUP ───────────────────────────────────
+// UWAGA: Wklej tutaj dane ze swojego nowo utworzonego projektu Firebase!
+const firebaseConfig = {
+  apiKey: "TWOJ_API_KEY",
+  authDomain: "TWOJ_PROJEKT.firebaseapp.com",
+  projectId: "TWOJ_PROJEKT",
+  storageBucket: "TWOJ_PROJEKT.appspot.com",
+  messagingSenderId: "SENDER_ID",
+  appId: "APP_ID"
+};
+
+// Inicjalizacja Firebase (jeśli konfiguracja nie jest pusta)
+let db, storageRef;
+if (firebaseConfig.apiKey !== "TWOJ_API_KEY") {
+  firebase.initializeApp(firebaseConfig);
+  db = firebase.firestore();
+  storageRef = firebase.storage().ref();
+} else {
+  console.warn("Brak poprawnej konfiguracji Firebase. Aplikacja nie zapisze plików w chmurze.");
+}
+
 // ─── STATE ────────────────────────────────────────────
 let role        = null;
 let curTask     = 0;
-let uploads     = {};   // { taskIdx: { slotKey: {dataUrl,type} } }
+let uploads     = {};   // Utrzymuje lokalny stan przesłanych linków (URL z Firebase) dla danej roli
 let heroIdx     = 0;
 let heroList    = [];
 let heroTimer   = null;
-let countdownDone = false;
 
-// ─── TASKS ────────────────────────────────────────────
+// ─── TASKS (PRZENUMEROWANE - 11 ZADAŃ) ───────────────
 const TASKS_HER = [
-  { id:1,  desc:"Zaczniemy od przygotowań — na pierwszy ogień pójdziemy z makijażem.",
-    slots:[{key:"makeup", label:"Zdjęcie makijażu", accept:"image/*", icon:"📸"}] },
-
-  { id:2,  desc:"Cały dzień składa się z różnych aktywności, dlatego to wyzwanie będzie wymagało aż dwóch zdjęć. Na teraz przygotuj ładny ubiór — za sukienkę dam ci dodatkowe punkty 😉 Drugi strój powinien być wygodny, ale jednocześnie podobać ci się na zdjęciach.",
-    slots:[
-      {key:"dress",  label:"Elegancki strój",  accept:"image/*", icon:"👗"},
-      {key:"dresy",  label:"Wygodny strój",    accept:"image/*", icon:"👖"}
-    ]},
-
-  { id:3,  desc:"Zanim wyjdziemy, chciałbym żebyś nagrała czego się dzisiaj spodziewasz.",
-    slots:[{key:"video", label:"Nagraj wideo", accept:"video/*", icon:"🎥"}] },
-
-  { id:4,  desc:"Podążaj za nawigacją, a na miejscu pokaż zdjęciem gdzie jesteś.",
-    map:"https://maps.app.goo.gl/i4PBWH8owSXakAPW7?g_st=ic",
-    slots:[{key:"photo", label:"Zdjęcie z miejsca", accept:"image/*", icon:"📍"}] },
-
-  { id:5,  desc:"Teraz wyzwanie przed nami większe — bo zdjęcie i filmik dodać musimy.",
-    slots:[
-      {key:"photo", label:"Zdjęcie",       accept:"image/*", icon:"📸"},
-      {key:"video", label:"Nagranie wideo",accept:"video/*", icon:"🎥"}
-    ]},
-
-  { id:6,  desc:"Spokojnie podkręcamy troszeczkę tempo — gdy za mapą podążysz to znajdziesz cel.",
-    map:"https://maps.app.goo.gl/tKU8g4QoxJgnY5j77?g_st=ic",
-    slots:[{key:"photo", label:"Zdjęcie z miejsca", accept:"image/*", icon:"📸"}] },
-
-  { id:7,  desc:"Ciekawi mnie co o tej niespodziance sądzisz — podziel się myślami w filmiku.",
-    slots:[{key:"video", label:"Nagraj swoje myśli", accept:"video/*", icon:"🎥"}] },
-
-  { id:8,  desc:"Co to byłby za dzień gdybyśmy głodni ganiali — niech zalążek zdecyduje i palcem na właściwy wybór pokieruje.",
-    choice:true,
-    map:"https://maps.app.goo.gl/tKU8g4QoxJgnY5j77?g_st=ic",
-    slots:[] },
-
-  { id:9,  desc:"Jedzonko wybrane? To czas na zdjęcie gdzie nam się przyszło stołować.",
-    slots:[{key:"photo", label:"Zdjęcie restauracji", accept:"image/*", icon:"🍽️"}] },
-
-  { id:10, desc:"Zapomniałbym poprosić o zdjęcie, żeby zobaczyć co wybraliśmy do jedzonka!",
-    slots:[{key:"food",  label:"Zdjęcie jedzenia",   accept:"image/*", icon:"🍕"}] },
-
-  { id:11, desc:"Z pełnym brzuchem warto odziać się w coś wygodnego — wróćmy się przebrać i odsapnąć po jedzeniu.",
-    slots:[{key:"outfit",label:"Zdjęcie w nowym stroju", accept:"image/*", icon:"👗"}] },
-
-  { id:12, desc:"To jeszcze nie koniec, chociaż już się zbliża. Jaka przygoda czeka na nas na końcu tej drogi.",
-    map:"https://maps.app.goo.gl/2KucpPwJyDKgSmPN7?g_st=ic",
-    slots:[{key:"photo", label:"Zdjęcie z miejsca", accept:"image/*", icon:"📍"}] },
-
-  { id:13, desc:"Dzień pełen wrażeń — opowiedz mi jakie odczucia masz do tej pory i prognozę, co jeszcze dzisiaj nas czeka?",
-    slots:[{key:"video", label:"Nagraj refleksje", accept:"video/*", icon:"🎥"}] },
-
-  { id:14, desc:"Niespodzianka ostatnia pod tym adresem się kryje.",
-    map:"https://maps.app.goo.gl/tYF2AyydwiBPqnGr8?g_st=ic",
-    slots:[{key:"photo", label:"Zdjęcie z niespodzianki", accept:"image/*", icon:"🎁"}] },
-
-  { id:15, desc:"Ostatnie wyzwanie — opowiedz mi proszę jak ci się ten dzień podobał? Co cię zaskoczyło, co się podobało.",
-    slots:[{key:"video", label:"Końcowe przemyślenia", accept:"video/*", icon:"🎥"}] }
+  { id:1, desc:"Zaczniemy od przygotowań — na pierwszy ogień pójdziemy z makijażem.", slots:[{key:"makeup", label:"Zdjęcie makijażu", accept:"image/*", icon:"📸"}] },
+  { id:2, desc:"Cały dzień składa się z różnych aktywności, dlatego to wyzwanie będzie wymagało aż dwóch zdjęć. Na teraz przygotuj ładny ubiór — za sukienkę dam ci dodatkowe punkty 😉 Drugi strój powinien być wygodny, ale jednocześnie podobać ci się na zdjęciach.", slots:[{key:"dress", label:"Elegancki strój", accept:"image/*", icon:"👗"}, {key:"dresy", label:"Wygodny strój", accept:"image/*", icon:"👖"}] },
+  { id:3, desc:"Zanim wyjdziemy, chciałbym żebyś nagrała czego się dzisiaj spodziewasz.", slots:[{key:"video", label:"Nagraj wideo", accept:"video/*", icon:"🎥"}] },
+  { id:4, desc:"Spokojnie podkręcamy troszeczkę tempo — gdy za mapą podążysz to znajdziesz cel.", map:"https://maps.google.com/maps?q=Escape+Room+Gdynia", slots:[{key:"photo", label:"Zdjęcie z miejsca", accept:"image/*", icon:"📸"}] },
+  { id:5, desc:"Ciekawi mnie co o tej niespodziance sądzisz — podziel się myślami w filmiku.", slots:[{key:"video", label:"Nagraj swoje myśli", accept:"video/*", icon:"🎥"}] },
+  { id:6, desc:"Co to byłby za dzień gdybyśmy głodni ganiali — niech zalążek zdecyduje i palcem na właściwy wybór pokieruje.", choice:true, slots:[] },
+  { id:7, desc:"Jedzonko wybrane? To czas na zdjęcie gdzie nam się przyszło stołować.", slots:[{key:"photo", label:"Zdjęcie restauracji", accept:"image/*", icon:"🍽️"}] },
+  { id:8, desc:"Zapomniałbym poprosić o zdjęcie, żeby zobaczyć co wybraliśmy do jedzonka!", slots:[{key:"food", label:"Zdjęcie jedzenia", accept:"image/*", icon:"🍕"}] },
+  { id:9, desc:"Z pełnym brzuchem warto odziać się w coś wygodnego — wróćmy się przebrać i odsapnąć po jedzeniu.", slots:[{key:"outfit",label:"Zdjęcie w nowym stroju", accept:"image/*", icon:"👗"}] },
+  { id:10, desc:"Niespodzianka ostatnia pod tym adresem się kryje.", map:"https://maps.google.com/maps?q=Klub+Bilardowy", slots:[{key:"photo", label:"Zdjęcie z niespodzianki", accept:"image/*", icon:"🎁"}] },
+  { id:11, desc:"Ostatnie wyzwanie — opowiedz mi proszę jak ci się ten dzień podobał? Co cię zaskoczyło, co się podobało.", slots:[{key:"video", label:"Końcowe przemyślenia", accept:"video/*", icon:"🎥"}] }
 ];
 
 const TASKS_HIM = [
-  { id:1,  desc:"Wrzuć nagranie z kwiatami i otwieraniem boxa.",
-    slots:[
-      {key:"flowers",label:"Nagranie z kwiatami",        accept:"video/*", icon:"💐"},
-      {key:"box",    label:"Nagranie z otwieraniem boxa",accept:"video/*", icon:"🎁"}
-    ]},
-
-  { id:2,  desc:"Dwa ubrania — wiesz co robić.",
-    slots:[
-      {key:"suit",  label:"Elegancki strój",  accept:"image/*", icon:"👔"},
-      {key:"chill", label:"Casualowy strój",  accept:"image/*", icon:"👕"}
-    ]},
-
-  { id:3,  desc:"Zanim wyjdziemy — wspólne zdjęcie.",
-    slots:[{key:"together", label:"Wspólne zdjęcie", accept:"image/*", icon:"📸"}] },
-
-  { id:4,  desc:"Jadąc w to miejsce nagraj jakiś fajny filmik.",
-    map:"https://maps.app.goo.gl/i4PBWH8owSXakAPW7?g_st=ic",
-    slots:[{key:"video", label:"Filmik w drodze", accept:"video/*", icon:"🎥"}] },
-
-  { id:5,  desc:"Zrób zdjęcie i film.",
-    slots:[
-      {key:"photo", label:"Zdjęcie",       accept:"image/*", icon:"📸"},
-      {key:"video", label:"Nagranie wideo",accept:"video/*", icon:"🎥"}
-    ]},
-
-  { id:6,  desc:"Wspólne zdjęcie — escape room.",
-    slots:[{key:"escape", label:"Wspólne zdjęcie", accept:"image/*", icon:"🚪"}] },
-
-  { id:7,  desc:"Zrób 2 zdjęcia w pokoju.",
-    slots:[
-      {key:"room", label:"Zdjęcie 1 — pokój", accept:"image/*", icon:"📸"},
-      {key:"back", label:"Zdjęcie 2 — tył",   accept:"image/*", icon:"📷"}
-    ]},
-
-  { id:8,  desc:"Ty wybierz.",
-    choice:true,
-    map:"https://maps.app.goo.gl/tKU8g4QoxJgnY5j77?g_st=ic",
-    slots:[] },
-
-  { id:9,  desc:"Zdjęcie przed jedzeniem.",
-    slots:[{key:"before", label:"Zdjęcie przed jedzeniem", accept:"image/*", icon:"🍽️"}] },
-
-  { id:10, desc:"Zdjęcie po jedzeniu.",
-    slots:[{key:"after",  label:"Zdjęcie po jedzeniu",    accept:"image/*", icon:"😋"}] },
-
-  { id:11, desc:"Zdjęcie w drugich ciuchach.",
-    slots:[{key:"outfit", label:"Zdjęcie w stroju", accept:"image/*", icon:"👕"}] },
-
-  { id:12, desc:"Filmik — zapytaj się Domi jak się czuje i czy jej się będzie podobać.",
-    slots:[{key:"video",  label:"Filmik z Domi",   accept:"video/*", icon:"🎥"}] },
-
-  { id:13, desc:"Wspólna fota po Zoltarze.",
-    slots:[{key:"zoltar", label:"Wspólne zdjęcie", accept:"image/*", icon:"🎪"}] },
-
-  { id:14, desc:"Zrób 2 zdjęcia z bilardu.",
-    slots:[
-      {key:"bil",  label:"Zdjęcie 1 — bilard", accept:"image/*", icon:"🎱"},
-      {key:"lard", label:"Zdjęcie 2 — bilard", accept:"image/*", icon:"🎱"}
-    ]},
-
-  { id:15, desc:"Zrób filmik z bilardu.",
-    slots:[{key:"video", label:"Filmik z bilardu", accept:"video/*", icon:"🎥"}] }
+  { id:1, desc:"Wrzuć nagranie z kwiatami i otwieraniem boxa.", slots:[{key:"flowers",label:"Nagranie z kwiatami", accept:"video/*", icon:"💐"}, {key:"box", label:"Nagranie z otwieraniem boxa",accept:"video/*", icon:"🎁"}] },
+  { id:2, desc:"Dwa ubrania — wiesz co robić.", slots:[{key:"suit", label:"Elegancki strój", accept:"image/*", icon:"👔"}, {key:"chill", label:"Casualowy strój", accept:"image/*", icon:"👕"}] },
+  { id:3, desc:"Zanim wyjdziemy — wspólne zdjęcie.", slots:[{key:"together", label:"Wspólne zdjęcie", accept:"image/*", icon:"📸"}] },
+  { id:4, desc:"Wspólne zdjęcie — escape room.", slots:[{key:"escape", label:"Wspólne zdjęcie", accept:"image/*", icon:"🚪"}] },
+  { id:5, desc:"Zrób 2 zdjęcia w pokoju.", slots:[{key:"room", label:"Zdjęcie 1 — pokój", accept:"image/*", icon:"📸"}, {key:"back", label:"Zdjęcie 2 — tył", accept:"image/*", icon:"📷"}] },
+  { id:6, desc:"Ty wybierz.", choice:true, slots:[] },
+  { id:7, desc:"Zdjęcie przed jedzeniem.", slots:[{key:"before", label:"Zdjęcie przed jedzeniem", accept:"image/*", icon:"🍽️"}] },
+  { id:8, desc:"Zdjęcie po jedzeniu.", slots:[{key:"after", label:"Zdjęcie po jedzeniu", accept:"image/*", icon:"😋"}] },
+  { id:9, desc:"Zdjęcie w drugich ciuchach.", slots:[{key:"outfit", label:"Zdjęcie w stroju", accept:"image/*", icon:"👕"}] },
+  { id:10, desc:"Zrób 2 zdjęcia z bilardu.", slots:[{key:"bil", label:"Zdjęcie 1 — bilard", accept:"image/*", icon:"🎱"}, {key:"lard", label:"Zdjęcie 2 — bilard", accept:"image/*", icon:"🎱"}] },
+  { id:11, desc:"Zrób filmik z bilardu.", slots:[{key:"video", label:"Filmik z bilardu", accept:"video/*", icon:"🎥"}] }
 ];
 
 const SECTIONS = [
   { title:"🌸 Poranna Miłość",        tasks:[1,2,3] },
-  { title:"🌊 Spacer Pośród Fal",     tasks:[4,5] },
-  { title:"💖 OBŁĘDNIE Cię Kocham",  tasks:[6,7] },
-  { title:"🍝 Przez serce do żołądka",tasks:[9,10] },
-  { title:"💃 Zabójczo piękna",       tasks:[11,12,13] },
-  { title:"🌙 Późną porą…",           tasks:[14,15] }
+  { title:"💖 OBŁĘDNIE Cię Kocham",  tasks:[4,5] },
+  { title:"🍝 Przez serce do żołądka",tasks:[6,7,8] },
+  { title:"💃 Zabójczo piękna",       tasks:[9] },
+  { title:"🌙 Późną porą…",           tasks:[10,11] }
 ];
 
 // ─── HELPERS ──────────────────────────────────────────
 function getTasks() { return role === 'her' ? TASKS_HER : TASKS_HIM; }
+function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById('screen-' + id).classList.add('active'); window.scrollTo(0, 0); }
+function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2600); }
 
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById('screen-' + id).classList.add('active');
-  window.scrollTo(0, 0);
-}
-
-function toast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2600);
-}
-
-// ─── PETALS ───────────────────────────────────────────
-function makePetals() {
-  const c = document.getElementById('petals-container');
-  for (let i = 0; i < 22; i++) {
-    const p = document.createElement('div');
-    p.className = 'petal';
-    p.style.cssText = `left:${Math.random()*100}vw;animation-duration:${6+Math.random()*8}s;animation-delay:${Math.random()*8}s;width:${6+Math.random()*7}px;height:${8+Math.random()*9}px;`;
-    c.appendChild(p);
-  }
-}
-
-// ─── COUNTDOWN ────────────────────────────────────────
+// ─── PETALS & COUNTDOWN ───────────────────────────────
+function makePetals() { const c = document.getElementById('petals-container'); for (let i=0; i<22; i++) { const p = document.createElement('div'); p.className = 'petal'; p.style.cssText = `left:${Math.random()*100}vw;animation-duration:${6+Math.random()*8}s;animation-delay:${Math.random()*8}s;width:${6+Math.random()*7}px;height:${8+Math.random()*9}px;`; c.appendChild(p); } }
 const TARGET = new Date('2026-06-05T13:00:00');
-
 function tick() {
   const diff = TARGET - Date.now();
   if (diff <= 0) { zeroClock(); showHearts(); return; }
-  const d = Math.floor(diff / 86400000);
-  const h = Math.floor((diff % 86400000) / 3600000);
-  const m = Math.floor((diff % 3600000)  / 60000);
-  const s = Math.floor((diff % 60000)    / 1000);
-  document.getElementById('days').textContent    = String(d).padStart(2,'0');
-  document.getElementById('hours').textContent   = String(h).padStart(2,'0');
-  document.getElementById('minutes').textContent = String(m).padStart(2,'0');
-  document.getElementById('seconds').textContent = String(s).padStart(2,'0');
+  document.getElementById('days').textContent = String(Math.floor(diff / 86400000)).padStart(2,'0');
+  document.getElementById('hours').textContent = String(Math.floor((diff % 86400000) / 3600000)).padStart(2,'0');
+  document.getElementById('minutes').textContent = String(Math.floor((diff % 3600000) / 60000)).padStart(2,'0');
+  document.getElementById('seconds').textContent = String(Math.floor((diff % 60000) / 1000)).padStart(2,'0');
 }
-
-function zeroClock() {
-  ['days','hours','minutes','seconds'].forEach(id => document.getElementById(id).textContent = '00');
-}
-
-function showHearts() {
-  document.getElementById('hearts-container').classList.add('visible');
-  countdownDone = true;
-}
-
+function zeroClock() { ['days','hours','minutes','seconds'].forEach(id => document.getElementById(id).textContent = '00'); }
+function showHearts() { document.getElementById('hearts-container').classList.add('visible'); }
 function skipCountdown() { zeroClock(); showHearts(); }
 
-// ─── ROLE & INSTRUCTIONS ──────────────────────────────
-function selectRole(r) {
-  role = r;
-  localStorage.setItem('adv_role', r);
+// ─── ROLE & INIT ──────────────────────────────────────
+async function selectRole(r) {
+  role = r; localStorage.setItem('adv_role', r);
   document.getElementById('ready-btn').textContent = r === 'her' ? 'Gotowa! ♡' : 'Gotowy! ♡';
   showScreen('instructions');
 }
 
-function startChallenges() {
-  curTask = 0;
-  uploads = {};
-  renderTask();
-  showScreen('challenges');
+async function startChallenges() {
+  curTask = 0; uploads = {};
+  
+  // Próba odzyskania stanu z bazy przy restarcie strony
+  if (db) {
+    try {
+      const doc = await db.collection('loveflix').doc(role).get();
+      if (doc.exists && doc.data().tasks) {
+        uploads = doc.data().tasks;
+        // Szukanie ostatniego niezakończonego zadania
+        const total = getTasks().length;
+        for (let i = 0; i < total; i++) {
+          if (!uploads[i]) { curTask = i; break; }
+          curTask = total - 1; // jeśli wszystko zrobione
+        }
+      }
+    } catch(e) { console.error("Nie udało się pobrać stanu:", e); }
+  }
+  renderTask(); showScreen('challenges');
 }
 
-// ─── CHALLENGE RENDER ─────────────────────────────────
+// ─── RENDER TASK ──────────────────────────────────────
 function renderTask() {
-  const tasks = getTasks();
-  const task  = tasks[curTask];
-  const total = tasks.length;
-
+  const tasks = getTasks(); const task = tasks[curTask]; const total = tasks.length;
   document.getElementById('progress-text').textContent = `Wyzwanie ${curTask + 1} z ${total}`;
-  document.getElementById('role-badge').textContent    = role === 'her' ? '♀ Her' : '♂ Him';
+  document.getElementById('role-badge').textContent = role === 'her' ? '♀ Her' : '♂ Him';
   document.getElementById('progress-fill').style.width = ((curTask + 1) / total * 100) + '%';
-
   if (!uploads[curTask]) uploads[curTask] = {};
 
-  // Map snippet
   const mapSnippet = task.map ? `
-    <div class="map-wrap">
-      <iframe src="https://maps.google.com/maps?q=${encodeURIComponent(task.map)}&output=embed" loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe>
-    </div>
-    <a class="map-btn" href="${task.map}" target="_blank" rel="noopener">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-      Otwórz w Mapach Google
-    </a>` : '';
+    <div class="map-wrap"><iframe src="${task.map}&output=embed" loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe></div>
+    <a class="map-btn" href="${task.map}" target="_blank" rel="noopener">Otwórz w Mapach Google</a>` : '';
 
-  // Upload slots or choice task
   let interactHTML = '';
-
   if (task.choice) {
     interactHTML = `
       <p style="font-size:0.75rem;color:#aaa;letter-spacing:1px;text-transform:uppercase;text-align:center;margin-bottom:10px;">Wybierz opcję</p>
       <div class="options-grid">
-        <button class="option-btn" onclick="pickOption(this,1)">Opcja 1</button>
-        <button class="option-btn" onclick="pickOption(this,2)">Opcja 2</button>
-        <button class="option-btn" onclick="pickOption(this,3)">Opcja 3</button>
-        <button class="option-btn" onclick="pickOption(this,4)">Opcja 4</button>
-      </div>
-      <div id="choice-map" style="display:none;">${mapSnippet}</div>`;
+        <button class="option-btn ${uploads[curTask]._choice === 1 ? 'picked' : ''}" onclick="pickOption(this,1)">Opcja 1</button>
+        <button class="option-btn ${uploads[curTask]._choice === 2 ? 'picked' : ''}" onclick="pickOption(this,2)">Opcja 2</button>
+        <button class="option-btn ${uploads[curTask]._choice === 3 ? 'picked' : ''}" onclick="pickOption(this,3)">Opcja 3</button>
+        <button class="option-btn ${uploads[curTask]._choice === 4 ? 'picked' : ''}" onclick="pickOption(this,4)">Opcja 4</button>
+      </div>`;
   } else {
     let slotsHTML = '';
     task.slots.forEach((slot, i) => {
       const isVid = slot.accept.includes('video');
+      const existing = uploads[curTask][slot.key];
+      
+      const uploadZoneStyle = existing ? 'display:none;' : '';
+      const previewStyle = existing ? 'display:flex;' : '';
+      const previewContent = existing 
+        ? `<button class="preview-rm" onclick="rmFile(${i},'${slot.key}')">✕</button>
+           ${existing.type === 'video' ? `<video src="${existing.url}" controls></video>` : `<img src="${existing.url}">`}`
+        : '';
+
       slotsHTML += `
         <div class="upload-block">
           <span class="upload-label-txt">${slot.label}</span>
-          <div class="upload-zone" id="uz-${i}"
+          <div class="upload-zone" id="uz-${i}" style="${uploadZoneStyle}"
                ondragover="ev.preventDefault();this.classList.add('over')"
                ondragleave="this.classList.remove('over')"
                ondrop="onDrop(event,${i},'${slot.key}')">
@@ -1177,249 +567,199 @@ function renderTask() {
             <span class="upload-zone-main">Kliknij lub przeciągnij plik</span>
             <span class="upload-zone-sub">${isVid ? 'MP4, MOV, AVI' : 'JPG, PNG, WEBP, HEIC'}</span>
           </div>
-          <div class="preview-wrap" id="pw-${i}">
-            <button class="preview-rm" onclick="rmFile(${i},'${slot.key}')">✕</button>
-          </div>
+          <div class="preview-wrap" id="pw-${i}" style="${previewStyle}">${previewContent}</div>
         </div>`;
     });
     interactHTML = `<div class="upload-section">${slotsHTML}</div>`;
   }
 
   const isLast = curTask === tasks.length - 1;
-
   document.getElementById('challenge-area').innerHTML = `
     <div class="challenge-card">
-      <div class="challenge-num-row">
-        <span class="num-badge">${task.id}</span>
-        Wyzwanie
-      </div>
+      <div class="challenge-num-row"><span class="num-badge">${task.id}</span>Wyzwanie</div>
       <p class="challenge-desc">${task.desc}</p>
       ${!task.choice && task.map ? mapSnippet : ''}
     </div>
-
     ${interactHTML}
-
     <button class="submit-btn" id="sub-btn" onclick="submitTask()">
       ${isLast ? '🎉 Zakończ przygodę!' : 'Prześlij i dalej →'}
-    </button>
-  `;
-
+    </button>`;
+  
   checkReady();
 }
 
-// ─── FILE HANDLING ────────────────────────────────────
-function onDrop(e, idx, key) {
-  e.preventDefault();
-  document.getElementById('uz-'+idx).classList.remove('over');
-  const f = e.dataTransfer.files[0];
-  if (f) readFile(f, idx, key);
-}
+// ─── FILE UPLOAD DO FIREBASE ──────────────────────────
+function onDrop(e, idx, key) { e.preventDefault(); document.getElementById('uz-'+idx).classList.remove('over'); const f = e.dataTransfer.files[0]; if (f) handleUpload(f, idx, key); }
+function onPick(e, idx, key) { const f = e.target.files[0]; if (f) handleUpload(f, idx, key); }
 
-function onPick(e, idx, key) {
-  const f = e.target.files[0];
-  if (f) readFile(f, idx, key);
-}
+async function handleUpload(file, idx, key) {
+  if (!db || !storageRef) { toast('Brak konfiguracji bazy!'); return; }
 
-function readFile(file, idx, key) {
-  const reader = new FileReader();
-  reader.onload = e => {
-    const dataUrl = e.target.result;
-    const isVid   = file.type.startsWith('video');
-    const entry   = { dataUrl, type: isVid ? 'video' : 'image' };
+  const uz = document.getElementById('uz-'+idx);
+  const originalHtml = uz.innerHTML;
+  uz.classList.add('loading');
+  uz.innerHTML = `<span class="upload-zone-icon">⏳</span><span class="upload-zone-main">Wysyłanie do bazy...</span>`;
 
-    uploads[curTask][key] = entry;
-    try { localStorage.setItem(`${role}_task_${curTask+1}_${key}`, JSON.stringify(entry)); }
-    catch(_) {}
+  try {
+    const isVid = file.type.startsWith('video');
+    const ext = file.name.split('.').pop() || (isVid ? 'mp4' : 'jpg');
+    const filename = `${role}_task_${curTask+1}_${key}_${Date.now()}.${ext}`;
+    
+    // Przesyłanie do Storage
+    const fileRef = storageRef.child(`loveflix/${filename}`);
+    await fileRef.put(file);
+    const downloadUrl = await fileRef.getDownloadURL();
 
-    // show preview
+    // Aktualizacja stanu i bazy Firestore
+    uploads[curTask][key] = { url: downloadUrl, type: isVid ? 'video' : 'image' };
+    await db.collection('loveflix').doc(role).set({ tasks: uploads }, { merge: true });
+
+    // UI - podgląd
     const pw = document.getElementById('pw-'+idx);
-    pw.classList.add('show');
+    pw.style.display = 'flex';
     pw.innerHTML = `
       <button class="preview-rm" onclick="rmFile(${idx},'${key}')">✕</button>
-      ${isVid
-        ? `<video src="${dataUrl}" controls style="max-width:100%;max-height:260px;"></video>`
-        : `<img src="${dataUrl}" alt="">`}`;
-    document.getElementById('uz-'+idx).style.display = 'none';
+      ${isVid ? `<video src="${downloadUrl}" controls></video>` : `<img src="${downloadUrl}">`}`;
+    uz.style.display = 'none';
+
+  } catch(e) {
+    console.error(e);
+    toast('❌ Błąd podczas wysyłania');
+  } finally {
+    uz.innerHTML = originalHtml;
+    uz.classList.remove('loading');
     checkReady();
-  };
-  reader.readAsDataURL(file);
+  }
 }
 
-function rmFile(idx, key) {
+async function rmFile(idx, key) {
   delete uploads[curTask][key];
-  localStorage.removeItem(`${role}_task_${curTask+1}_${key}`);
-  const pw = document.getElementById('pw-'+idx);
-  pw.classList.remove('show');
-  pw.innerHTML = '';
-  const uz = document.getElementById('uz-'+idx);
-  if (uz) { uz.style.display = ''; const fi = document.getElementById('fi-'+idx); if (fi) fi.value=''; }
+  if(db) await db.collection('loveflix').doc(role).set({ tasks: uploads }, { merge: true });
+  document.getElementById('pw-'+idx).style.display = 'none';
+  document.getElementById('uz-'+idx).style.display = '';
+  document.getElementById('fi-'+idx).value = '';
   checkReady();
 }
 
-function pickOption(btn, num) {
+async function pickOption(btn, num) {
   document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('picked'));
   btn.classList.add('picked');
   uploads[curTask] = { _choice: num };
-  localStorage.setItem(`${role}_task_${curTask+1}_choice`, num);
-  const cm = document.getElementById('choice-map');
-  if (cm) cm.style.display = 'block';
+  if(db) await db.collection('loveflix').doc(role).set({ tasks: uploads }, { merge: true });
   checkReady();
 }
 
 function checkReady() {
-  const task = getTasks()[curTask];
-  const btn  = document.getElementById('sub-btn');
-  if (!btn) return;
+  const task = getTasks()[curTask]; const btn = document.getElementById('sub-btn'); if (!btn) return;
   let ok = false;
-  if (task.choice) {
-    ok = !!(uploads[curTask] && uploads[curTask]._choice !== undefined);
-  } else {
-    const keys = task.slots.map(s => s.key);
-    ok = keys.length === 0 || keys.every(k => uploads[curTask] && uploads[curTask][k]);
-  }
+  if (task.choice) { ok = !!(uploads[curTask] && uploads[curTask]._choice !== undefined); } 
+  else { const keys = task.slots.map(s => s.key); ok = keys.length === 0 || keys.every(k => uploads[curTask] && uploads[curTask][k]); }
   btn.classList.toggle('on', ok);
 }
 
 function submitTask() {
-  const btn = document.getElementById('sub-btn');
-  if (!btn.classList.contains('on')) return;
-  btn.textContent = '⏳ Zapisuję…';
-  btn.classList.remove('on');
-
-  setTimeout(() => {
-    const tasks = getTasks();
-    if (curTask < tasks.length - 1) {
-      curTask++;
-      renderTask();
-      window.scrollTo(0, 0);
-      toast(`Wyzwanie ${curTask} zaliczone! ✓`);
-    } else {
-      showScreen('finale');
-      buildFinale();
-    }
-  }, 700);
-}
-
-// ─── FINALE ───────────────────────────────────────────
-function getMedia(r, taskNum, key) {
-  try {
-    const raw = localStorage.getItem(`${r}_task_${taskNum}_${key}`);
-    if (raw) return JSON.parse(raw);
-  } catch(_) {}
-  if (r === role) {
-    const entry = uploads[taskNum-1];
-    if (entry && entry[key]) return entry[key];
+  const btn = document.getElementById('sub-btn'); if (!btn.classList.contains('on')) return;
+  const tasks = getTasks();
+  if (curTask < tasks.length - 1) {
+    curTask++; renderTask(); window.scrollTo(0, 0); toast(`Wyzwanie zaliczone! ✓`);
+  } else {
+    showScreen('finale'); buildFinale();
   }
-  return null;
 }
 
-function buildFinale() {
-  // Collect images for hero
+// ─── FINALE (POBIERANIE Z FIREBASE) ───────────────────
+async function buildFinale() {
+  const slidesEl = document.getElementById('hero-slides');
+  const dotsEl   = document.getElementById('hero-dots');
+  const content  = document.getElementById('nf-content');
+  
+  slidesEl.innerHTML = `<div class="hero-slide" style="background:#111;display:flex;align-items:center;justify-content:center;"><span style="color:#fff;font-family:'Lato'">Pobieranie wspomnień z bazy... ⏳</span></div>`;
+  dotsEl.innerHTML = ''; content.innerHTML = '';
+
+  let dataHer = {}, dataHim = {};
+  if (db) {
+    try {
+      const [docHer, docHim] = await Promise.all([
+        db.collection('loveflix').doc('her').get(),
+        db.collection('loveflix').doc('him').get()
+      ]);
+      dataHer = docHer.exists ? docHer.data().tasks || {} : {};
+      dataHim = docHim.exists ? docHim.data().tasks || {} : {};
+    } catch(e) { console.error("Błąd pobierania bazy:", e); }
+  }
+
+  const getDbMedia = (r, tIdx, key) => {
+    const data = r === 'her' ? dataHer : dataHim;
+    return data[tIdx-1] ? data[tIdx-1][key] : null;
+  };
+
   const heroImgs = [];
-  for (let t = 1; t <= 15; t++) {
+  for (let t = 1; t <= 11; t++) {
     ['her','him'].forEach(r => {
       const tasks = r==='her' ? TASKS_HER : TASKS_HIM;
-      tasks[t-1].slots.forEach(s => {
-        const m = getMedia(r, t, s.key);
-        if (m && m.type === 'image') heroImgs.push(m);
-      });
+      if (tasks[t-1]) {
+        tasks[t-1].slots.forEach(s => {
+          const m = getDbMedia(r, t, s.key);
+          if (m && m.type === 'image') heroImgs.push(m);
+        });
+      }
     });
   }
 
-  // Hero slides
-  const slidesEl = document.getElementById('hero-slides');
-  const dotsEl   = document.getElementById('hero-dots');
-  slidesEl.innerHTML = '';
-  dotsEl.innerHTML   = '';
   heroList = heroImgs.slice(0, 7);
-
   if (!heroList.length) {
     slidesEl.innerHTML = `<div class="hero-slide" style="background:linear-gradient(135deg,#2a1520,#1a0a10);display:flex;align-items:center;justify-content:center;"><span style="font-size:5rem">💕</span></div>`;
   } else {
+    slidesEl.innerHTML = '';
     heroList.forEach((m, i) => {
-      slidesEl.innerHTML += `<div class="hero-slide"><img src="${m.dataUrl}" alt=""></div>`;
+      slidesEl.innerHTML += `<div class="hero-slide"><img src="${m.url}"></div>`;
       dotsEl.innerHTML   += `<div class="hero-dot${i===0?' on':''}" onclick="goSlide(${i})"></div>`;
     });
     if (heroTimer) clearInterval(heroTimer);
     heroTimer = setInterval(() => goSlide((heroIdx+1) % heroList.length), 4200);
   }
 
-  // Rows
-  const content = document.getElementById('nf-content');
-  content.innerHTML = '';
   SECTIONS.forEach(sec => {
     let thumbs = '';
     sec.tasks.forEach(tn => {
       ['her','him'].forEach(r => {
         const tasks = r==='her' ? TASKS_HER : TASKS_HIM;
-        tasks[tn-1].slots.forEach(s => {
-          const m = getMedia(r, tn, s.key);
-          thumbs += m ? makeThumb(m) : makePh();
-        });
+        if (tasks[tn-1]) {
+          tasks[tn-1].slots.forEach(s => {
+            const m = getDbMedia(r, tn, s.key);
+            thumbs += m ? makeThumb(m) : makePh();
+          });
+        }
       });
     });
-    content.innerHTML += `
-      <div class="nf-row">
-        <h3 class="row-title">${sec.title}</h3>
-        <div class="row-items">${thumbs}</div>
-      </div>`;
+    content.innerHTML += `<div class="nf-row"><h3 class="row-title">${sec.title}</h3><div class="row-items">${thumbs}</div></div>`;
   });
 }
 
 function makeThumb(m) {
-  const inner = m.type === 'video'
-    ? `<video src="${m.dataUrl}" preload="metadata" muted></video>`
-    : `<img src="${m.dataUrl}" alt="">`;
+  const inner = m.type === 'video' ? `<video src="${m.url}" preload="metadata" muted></video>` : `<img src="${m.url}">`;
   const playIcon = `<svg width="15" height="15" viewBox="0 0 24 24" fill="#333"><polygon points="5 3 19 12 5 21 5 3"/></svg>`;
-  return `
-    <div class="media-thumb" onclick="openLb('${m.dataUrl}','${m.type}')">
-      ${inner}
-      <div class="thumb-overlay"><div class="play-icon">${playIcon}</div></div>
-      <span class="type-badge">${m.type==='video'?'VIDEO':'FOTO'}</span>
-    </div>`;
+  return `<div class="media-thumb" onclick="openLb('${m.url}','${m.type}')">${inner}<div class="thumb-overlay"><div class="play-icon">${playIcon}</div></div><span class="type-badge">${m.type==='video'?'VIDEO':'FOTO'}</span></div>`;
 }
-
-function makePh() {
-  return `<div class="media-thumb"><div class="media-ph"><span class="ph-icon">📼</span><span class="ph-txt">Brak nagrania</span></div></div>`;
-}
+function makePh() { return `<div class="media-thumb"><div class="media-ph"><span class="ph-icon">📼</span><span class="ph-txt">Brak nagrania</span></div></div>`; }
 
 function goSlide(i) {
-  heroIdx = i;
-  document.getElementById('hero-slides').style.transform = `translateX(-${i*100}%)`;
+  heroIdx = i; document.getElementById('hero-slides').style.transform = `translateX(-${i*100}%)`;
   document.querySelectorAll('.hero-dot').forEach((d,j) => d.classList.toggle('on', j===i));
 }
 
-// ─── LIGHTBOX ─────────────────────────────────────────
 function openLb(src, type) {
   const lb = document.getElementById('lightbox');
-  document.getElementById('lb-media').innerHTML = type === 'video'
-    ? `<video src="${src}" controls autoplay style="max-width:92vw;max-height:90vh;border-radius:10px;"></video>`
-    : `<img src="${src}" alt="" style="max-width:92vw;max-height:90vh;border-radius:10px;object-fit:contain;">`;
-  lb.classList.add('open');
-  document.body.style.overflow = 'hidden';
+  document.getElementById('lb-media').innerHTML = type === 'video' ? `<video src="${src}" controls autoplay></video>` : `<img src="${src}">`;
+  lb.classList.add('open'); document.body.style.overflow = 'hidden';
 }
+function closeLb() { const lb = document.getElementById('lightbox'); lb.classList.remove('open'); lb.querySelector('video')?.pause?.(); document.body.style.overflow = ''; }
+document.getElementById('lightbox').addEventListener('click', e => { if (e.target === document.getElementById('lightbox')) closeLb(); });
 
-function closeLb() {
-  const lb = document.getElementById('lightbox');
-  lb.classList.remove('open');
-  lb.querySelector('video')?.pause?.();
-  document.body.style.overflow = '';
-}
-
-document.getElementById('lightbox').addEventListener('click', e => {
-  if (e.target === document.getElementById('lightbox')) closeLb();
-});
-
-// ─── INIT ─────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-  makePetals();
-  tick();
-  setInterval(tick, 1000);
-  // restore role
-  const saved = localStorage.getItem('adv_role');
-  if (saved) role = saved;
+  makePetals(); tick(); setInterval(tick, 1000);
+  const saved = localStorage.getItem('adv_role'); if (saved) role = saved;
 });
 </script>
 </body>
 </html>
-HTMLEOF
