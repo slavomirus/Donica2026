@@ -2,6 +2,78 @@
 <html lang="pl">
 <head>
 <script src="https://unpkg.com/cloudinary-core@2.13.0/cloudinary-core-shrinkwrap.min.js" type="text/javascript"></script>
+<script>
+// 1. Configure Cloudinary
+const cloudName = 'dzsmlpee4';
+const apiKey = '982515215468437';
+const apiSecret = 'WlIxikRwP_7rhk2HEiRI1bjxaeQ';
+
+const cl = new cloudinary.Cloudinary({
+    cloud_name: cloudName,
+    api_key: apiKey,
+    api_secret: apiSecret
+});
+
+async function runCloudinaryIntegration() {
+    try {
+        // 2. Upload an image
+        const timestamp = Math.floor(Date.now() / 1000);
+        const stringToSign = `timestamp=${timestamp}${apiSecret}`;
+
+        // Generowanie sygnatury SHA-1 do bezpiecznego uploadu
+        const encoder = new TextEncoder();
+        const data = encoder.encode(stringToSign);
+        const hashBuffer = await crypto.subtle.digest('SHA-1', data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const signature = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+        const formData = new FormData();
+        formData.append('file', 'https://res.cloudinary.com/demo/image/upload/sample.jpg');
+        formData.append('api_key', apiKey);
+        formData.append('timestamp', timestamp);
+        formData.append('signature', signature);
+
+        const uploadResponse = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+            method: 'POST',
+            body: formData
+        });
+
+        const uploadResult = await uploadResponse.json();
+
+        if (!uploadResponse.ok) {
+            throw new Error(uploadResult.error ? uploadResult.error.message : 'Błąd wgrywania');
+        }
+
+        console.log('--- Uploaded Image ---');
+        console.log('Secure URL:', uploadResult.secure_url);
+        console.log('Public ID:', uploadResult.public_id);
+
+        // 3. Get image details
+        console.log('\n--- Image Metadata ---');
+        console.log('Width:', uploadResult.width);
+        console.log('Height:', uploadResult.height);
+        console.log('Format:', uploadResult.format);
+        console.log('Size (bytes):', uploadResult.bytes);
+
+        // 4. Transform the image
+        // f_auto: automatycznie serwuje optymalny format dla przeglądarki użytkownika
+        // q_auto: automatycznie dobiera kompresję minimalizującą rozmiar bez utraty jakości
+        const transformedUrl = cl.url(uploadResult.public_id, {
+            fetch_format: 'auto',
+            quality: 'auto'
+        });
+
+        console.log('\n--- Transformed Image ---');
+        console.log('Done! Click link below to see optimized version of the image. Check the size and the format.');
+        console.log(transformedUrl);
+
+    } catch (error) {
+        console.error('Wystąpił błąd Cloudinary:', error);
+    }
+}
+
+runCloudinaryIntegration();
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Nasz Wyjątkowy Dzień 💕</title>
