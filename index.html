@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Nasz Wyjątkowy Dzień 💕</title>
+<title>Nasz Wyjątkowy Dzień</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&family=Dancing+Script:wght@600;700&display=swap" rel="stylesheet">
 
 <style>
@@ -268,7 +268,6 @@
   }
   .hero-content { position: absolute; bottom: clamp(24px,5vw,72px); left: clamp(16px,4vw,52px); z-index: 5; }
   .hero-title { font-family: 'Playfair Display', serif; font-size: clamp(1.8rem,6vw,4rem); font-weight: 700; color: #fff; text-shadow: 2px 2px 8px rgba(0,0,0,0.5); line-height: 1.1; margin-bottom: 10px; }
-  .hero-sub { font-family: 'Dancing Script', cursive; font-size: clamp(0.95rem,2.5vw,1.5rem); color: rgba(255,255,255,0.65); }
   .hero-dots { position: absolute; bottom: 18px; right: 24px; display: flex; gap: 7px; }
   .hero-dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.3); cursor: pointer; transition: all 0.3s; }
   .hero-dot.on { background: #fff; transform: scale(1.35); }
@@ -373,10 +372,10 @@
 <div id="screen-challenges" class="screen">
   <div class="challenges-header">
     <div class="header-row">
-      <span class="progress-info" id="progress-text">Wyzwanie 1 z 11</span>
+      <span class="progress-info" id="progress-text">Wyzwanie 1 z 12</span>
       <span class="progress-info" id="role-badge">♀ Her</span>
     </div>
-    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:9%"></div></div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
   </div>
   <div class="challenge-area" id="challenge-area"></div>
 </div>
@@ -391,7 +390,6 @@
     <div class="hero-grad"></div>
     <div class="hero-content">
       <h1 class="hero-title">Nasz Wyjątkowy<br>Dzień</h1>
-      <p class="hero-sub">5 Czerwca 2026 💕</p>
     </div>
     <div class="hero-dots" id="hero-dots"></div>
   </div>
@@ -411,46 +409,49 @@ const API_SECRET = 'WlIxikRwP_7rhk2HEiRI1bjxaeQ';
 // ─── STATE ────────────────────────────────────────────
 let role        = null;
 let curTask     = 0;
-let uploads     = {};   // Utrzymuje lokalny stan przesłanych linków (z Cloudinary) dla danej roli
+let uploads     = {};
 let heroIdx     = 0;
 let heroList    = [];
 let heroTimer   = null;
 
-// ─── TASKS (PRZENUMEROWANE - 11 ZADAŃ) ───────────────
+// ─── TASKS (ZAKTUALIZOWANE - 12 ZADAŃ) ───────────────
 const TASKS_HER = [
   { id:1, desc:"Zaczniemy od przygotowań — na pierwszy ogień pójdziemy z makijażem.", slots:[{key:"makeup", label:"Zdjęcie makijażu", accept:"image/*", icon:"📸"}] },
   { id:2, desc:"Cały dzień składa się z różnych aktywności, dlatego to wyzwanie będzie wymagało aż dwóch zdjęć. Na teraz przygotuj ładny ubiór — za sukienkę dam ci dodatkowe punkty 😉 Drugi strój powinien być wygodny, ale jednocześnie podobać ci się na zdjęciach.", slots:[{key:"dress", label:"Elegancki strój", accept:"image/*", icon:"👗"}, {key:"dresy", label:"Wygodny strój", accept:"image/*", icon:"👖"}] },
   { id:3, desc:"Zanim wyjdziemy, chciałbym żebyś nagrała czego się dzisiaj spodziewasz.", slots:[{key:"video", label:"Nagraj wideo", accept:"video/*", icon:"🎥"}] },
-  { id:4, desc:"Spokojnie podkręcamy troszeczkę tempo — gdy za mapą podążysz to znajdziesz cel.", map:"https://maps.google.com/maps?q=Escape+Room+Gdynia", slots:[{key:"photo", label:"Zdjęcie z miejsca", accept:"image/*", icon:"📸"}] },
-  { id:5, desc:"Ciekawi mnie co o tej niespodziance sądzisz — podziel się myślami w filmiku.", slots:[{key:"video", label:"Nagraj swoje myśli", accept:"video/*", icon:"🎥"}] },
-  { id:6, desc:"Co to byłby za dzień gdybyśmy głodni ganiali — niech zalążek zdecyduje i palcem na właściwy wybór pokieruje.", choice:true, slots:[] },
-  { id:7, desc:"Jedzonko wybrane? To czas na zdjęcie gdzie nam się przyszło stołować.", slots:[{key:"photo", label:"Zdjęcie restauracji", accept:"image/*", icon:"🍽️"}] },
-  { id:8, desc:"Zapomniałbym poprosić o zdjęcie, żeby zobaczyć co wybraliśmy do jedzonka!", slots:[{key:"food", label:"Zdjęcie jedzenia", accept:"image/*", icon:"🍕"}] },
-  { id:9, desc:"Z pełnym brzuchem warto odziać się w coś wygodnego — wróćmy się przebrać i odsapnąć po jedzeniu.", slots:[{key:"outfit",label:"Zdjęcie w nowym stroju", accept:"image/*", icon:"👗"}] },
-  { id:10, desc:"Niespodzianka ostatnia pod tym adresem się kryje.", map:"https://maps.google.com/maps?q=Klub+Bilardowy", slots:[{key:"photo", label:"Zdjęcie z niespodzianki", accept:"image/*", icon:"🎁"}] },
-  { id:11, desc:"Ostatnie wyzwanie — opowiedz mi proszę jak ci się ten dzień podobał? Co cię zaskoczyło, co się podobało.", slots:[{key:"video", label:"Końcowe przemyślenia", accept:"video/*", icon:"🎥"}] }
+  { id:4, desc:"Mała zmiana planów! Kwiaciarnia była zamknięta w Boże Ciało, więc najpierw musimy tam podjechać. Nagraj filmik w trakcie podróży!", map:"https://www.google.com/maps/embed?pb=!1m28!1m12!1m3!1d18517.1389878807!2d18.431518589700506!3d54.53980078988523!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!4m13!3e6!4m5!1s0x46fda43cdebbb3e1%3A0xfdc6e6d0ee507057!2sKcy%C5%84ska%206%2C%2081-005%20Gdynia!3m2!1d54.5455641!2d18.452236!4m5!1s0x46fda7000587de39%3A0x1f3cb3f6077f23d5!2sKwiaciarnia%20R%C3%B3%C5%BCyczka%2C%20Chylo%C5%84ska%20100%2C%2081-033%20Gdynia!3m2!1d54.5430571!2d18.4696553!5e0!3m2!1sen!2spl!4v1780609603778!5m2!1sen!2spl", slots:[{key:"video_trip", label:"Nagraj wideo", accept:"video/*", icon:"🎥"}] },
+  { id:5, desc:"Spokojnie podkręcamy troszeczkę tempo — gdy za mapą podążysz to znajdziesz cel.", map:"https://www.google.com/maps/embed?pb=!1m28!1m12!1m3!1d37039.30011692915!2d18.45713442162793!3d54.53426662211717!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!4m13!3e6!4m5!1s0x46fda43cdebbb3e1%3A0xfdc6e6d0ee507057!2sKcy%C5%84ska%206%2C%2081-005%20Gdynia!3m2!1d54.5455641!2d18.452236!4m5!1s0x46fda73adfb73ccd%3A0xd40bc518eb5b658b!2sWalkout%2C%20skwer%20Ko%C5%9Bciuszki%2015%2F9%2C%2081-370%20Gdynia!3m2!1d54.518936999999994!2d18.5434315!5e0!3m2!1sen!2spl!4v1780609407288!5m2!1sen!2spl", slots:[{key:"photo", label:"Zdjęcie z miejsca", accept:"image/*", icon:"📸"}] },
+  { id:6, desc:"Ciekawi mnie co o tej niespodziance sądzisz — podziel się myślami w filmiku.", slots:[{key:"video_thoughts", label:"Nagraj swoje myśli", accept:"video/*", icon:"🎥"}] },
+  { id:7, desc:"Co to byłby za dzień gdybyśmy głodni ganiali — niech zalążek zdecyduje i palcem na właściwy wybór pokieruje.", choice:true, map:"https://www.google.com/maps/embed?pb=!1m28!1m12!1m3!1d2315.8765340692808!2d18.539761462112168!3d54.51803878629983!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!4m13!3e6!4m5!1s0x46fda73adfb73ccd%3A0xd40bc518eb5b658b!2sWalkout%2C%20skwer%20Ko%C5%9Bciuszki%2015%2F9%2C%2081-370%20Gdynia!3m2!1d54.518936999999994!2d18.5434315!4m5!1s0x46fda73aa5f0039f%3A0xb93aba989853a61f!2sPasta%20Miasta%2C%20%C5%9Awi%C4%99toja%C5%84ska%2046%2C%2081-368%20Gdynia!3m2!1d54.516983499999995!2d18.5412383!5e0!3m2!1sen!2spl!4v1780609456935!5m2!1sen!2spl", slots:[] },
+  { id:8, desc:"Jedzonko wybrane? To czas na zdjęcie gdzie nam się przyszło stołować.", slots:[{key:"photo_rest", label:"Zdjęcie restauracji", accept:"image/*", icon:"🍽️"}] },
+  { id:9, desc:"Zapomniałbym poprosić o zdjęcie, żeby zobaczyć co wybraliśmy do jedzonka!", slots:[{key:"food", label:"Zdjęcie jedzenia", accept:"image/*", icon:"🍕"}] },
+  { id:10, desc:"Z pełnym brzuchem warto odziać się w coś wygodnego — wróćmy się przebrać i odsapnąć po jedzeniu.", slots:[{key:"outfit",label:"Zdjęcie w nowym stroju", accept:"image/*", icon:"👗"}] },
+  { id:11, desc:"Niespodzianka ostatnia pod tym adresem się kryje.", map:"https://www.google.com/maps/embed?pb=!1m28!1m12!1m3!1d9264.947534303794!2d18.527596264697646!3d54.51168361759935!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!4m13!3e6!4m5!1s0x46fda73aa5f0039f%3A0xb93aba989853a61f!2sPasta%20Miasta%2C%20%C5%9Awi%C4%99toja%C5%84ska%2046%2C%2081-368%20Gdynia!3m2!1d54.516983499999995!2d18.5412383!4m5!1s0x46fda732fbe5697d%3A0x8c042726c0406493!2sCentrum%20U7%20Gdynia%2C%20%C5%9Awi%C4%99toja%C5%84ska%20133%2C%2081-381%20Gdynia!3m2!1d54.5075003!2d18.5379814!5e0!3m2!1sen!2spl!4v1780609516170!5m2!1sen!2spl", slots:[{key:"photo_end", label:"Zdjęcie z niespodzianki", accept:"image/*", icon:"🎁"}] },
+  { id:12, desc:"Ostatnie wyzwanie — opowiedz mi proszę jak ci się ten dzień podobał? Co cię zaskoczyło, co się podobało.", slots:[{key:"video_final", label:"Końcowe przemyślenia", accept:"video/*", icon:"🎥"}] }
 ];
 
 const TASKS_HIM = [
   { id:1, desc:"Wrzuć nagranie z kwiatami i otwieraniem boxa.", slots:[{key:"flowers",label:"Nagranie z kwiatami", accept:"video/*", icon:"💐"}, {key:"box", label:"Nagranie z otwieraniem boxa",accept:"video/*", icon:"🎁"}] },
   { id:2, desc:"Dwa ubrania — wiesz co robić.", slots:[{key:"suit", label:"Elegancki strój", accept:"image/*", icon:"👔"}, {key:"chill", label:"Casualowy strój", accept:"image/*", icon:"👕"}] },
   { id:3, desc:"Zanim wyjdziemy — wspólne zdjęcie.", slots:[{key:"together", label:"Wspólne zdjęcie", accept:"image/*", icon:"📸"}] },
-  { id:4, desc:"Wspólne zdjęcie — escape room.", slots:[{key:"escape", label:"Wspólne zdjęcie", accept:"image/*", icon:"🚪"}] },
-  { id:5, desc:"Zrób 2 zdjęcia w pokoju.", slots:[{key:"room", label:"Zdjęcie 1 — pokój", accept:"image/*", icon:"📸"}, {key:"back", label:"Zdjęcie 2 — tył", accept:"image/*", icon:"📷"}] },
-  { id:6, desc:"Ty wybierz.", choice:true, slots:[] },
-  { id:7, desc:"Zdjęcie przed jedzeniem.", slots:[{key:"before", label:"Zdjęcie przed jedzeniem", accept:"image/*", icon:"🍽️"}] },
-  { id:8, desc:"Zdjęcie po jedzeniu.", slots:[{key:"after", label:"Zdjęcie po jedzeniu", accept:"image/*", icon:"😋"}] },
-  { id:9, desc:"Zdjęcie w drugich ciuchach.", slots:[{key:"outfit", label:"Zdjęcie w stroju", accept:"image/*", icon:"👕"}] },
-  { id:10, desc:"Zrób 2 zdjęcia z bilardu.", slots:[{key:"bil", label:"Zdjęcie 1 — bilard", accept:"image/*", icon:"🎱"}, {key:"lard", label:"Zdjęcie 2 — bilard", accept:"image/*", icon:"🎱"}] },
-  { id:11, desc:"Zrób filmik z bilardu.", slots:[{key:"video", label:"Filmik z bilardu", accept:"video/*", icon:"🎥"}] }
+  { id:4, desc:"Podróż do kwiaciarni! Nagraj filmik w drodze.", map:"https://www.google.com/maps/embed?pb=!1m28!1m12!1m3!1d18517.1389878807!2d18.431518589700506!3d54.53980078988523!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!4m13!3e6!4m5!1s0x46fda43cdebbb3e1%3A0xfdc6e6d0ee507057!2sKcy%C5%84ska%206%2C%2081-005%20Gdynia!3m2!1d54.5455641!2d18.452236!4m5!1s0x46fda7000587de39%3A0x1f3cb3f6077f23d5!2sKwiaciarnia%20R%C3%B3%C5%BCyczka%2C%20Chylo%C5%84ska%20100%2C%2081-033%20Gdynia!3m2!1d54.5430571!2d18.4696553!5e0!3m2!1sen!2spl!4v1780609603778!5m2!1sen!2spl", slots:[{key:"video_trip", label:"Filmik z drogi", accept:"video/*", icon:"🎥"}] },
+  { id:5, desc:"Wspólne zdjęcie — escape room.", map:"https://www.google.com/maps/embed?pb=!1m28!1m12!1m3!1d37039.30011692915!2d18.45713442162793!3d54.53426662211717!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!4m13!3e6!4m5!1s0x46fda43cdebbb3e1%3A0xfdc6e6d0ee507057!2sKcy%C5%84ska%206%2C%2081-005%20Gdynia!3m2!1d54.5455641!2d18.452236!4m5!1s0x46fda73adfb73ccd%3A0xd40bc518eb5b658b!2sWalkout%2C%20skwer%20Ko%C5%9Bciuszki%2015%2F9%2C%2081-370%20Gdynia!3m2!1d54.518936999999994!2d18.5434315!5e0!3m2!1sen!2spl!4v1780609407288!5m2!1sen!2spl", slots:[{key:"escape", label:"Wspólne zdjęcie", accept:"image/*", icon:"🚪"}] },
+  { id:6, desc:"Zrób 2 zdjęcia w pokoju.", slots:[{key:"room", label:"Zdjęcie 1 — pokój", accept:"image/*", icon:"📸"}, {key:"back", label:"Zdjęcie 2 — tył", accept:"image/*", icon:"📷"}] },
+  { id:7, desc:"Ty wybierz.", choice:true, map:"https://www.google.com/maps/embed?pb=!1m28!1m12!1m3!1d2315.8765340692808!2d18.539761462112168!3d54.51803878629983!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!4m13!3e6!4m5!1s0x46fda73adfb73ccd%3A0xd40bc518eb5b658b!2sWalkout%2C%20skwer%20Ko%C5%9Bciuszki%2015%2F9%2C%2081-370%20Gdynia!3m2!1d54.518936999999994!2d18.5434315!4m5!1s0x46fda73aa5f0039f%3A0xb93aba989853a61f!2sPasta%20Miasta%2C%20%C5%9Awi%C4%99toja%C5%84ska%2046%2C%2081-368%20Gdynia!3m2!1d54.516983499999995!2d18.5412383!5e0!3m2!1sen!2spl!4v1780609456935!5m2!1sen!2spl", slots:[] },
+  { id:8, desc:"Zdjęcie przed jedzeniem.", slots:[{key:"before", label:"Zdjęcie przed jedzeniem", accept:"image/*", icon:"🍽️"}] },
+  { id:9, desc:"Zdjęcie po jedzeniu.", slots:[{key:"after", label:"Zdjęcie po jedzeniu", accept:"image/*", icon:"😋"}] },
+  { id:10, desc:"Zdjęcie w drugich ciuchach.", slots:[{key:"outfit", label:"Zdjęcie w stroju", accept:"image/*", icon:"👕"}] },
+  { id:11, desc:"Zrób 2 zdjęcia z bilardu.", map:"https://www.google.com/maps/embed?pb=!1m28!1m12!1m3!1d9264.947534303794!2d18.527596264697646!3d54.51168361759935!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!4m13!3e6!4m5!1s0x46fda73aa5f0039f%3A0xb93aba989853a61f!2sPasta%20Miasta%2C%20%C5%9Awi%C4%99toja%C5%84ska%2046%2C%2081-368%20Gdynia!3m2!1d54.516983499999995!2d18.5412383!4m5!1s0x46fda732fbe5697d%3A0x8c042726c0406493!2sCentrum%20U7%20Gdynia%2C%20%C5%9Awi%C4%99toja%C5%84ska%20133%2C%2081-381%20Gdynia!3m2!1d54.5075003!2d18.5379814!5e0!3m2!1sen!2spl!4v1780609516170!5m2!1sen!2spl", slots:[{key:"bil", label:"Zdjęcie 1 — bilard", accept:"image/*", icon:"🎱"}, {key:"lard", label:"Zdjęcie 2 — bilard", accept:"image/*", icon:"🎱"}] },
+  { id:12, desc:"Zrób filmik z bilardu.", slots:[{key:"video_final", label:"Filmik z bilardu", accept:"video/*", icon:"🎥"}] }
 ];
 
 const SECTIONS = [
   { title:"🌸 Poranna Miłość",        tasks:[1,2,3] },
-  { title:"💖 OBŁĘDNIE Cię Kocham",  tasks:[4,5] },
-  { title:"🍝 Przez serce do żołądka",tasks:[6,7,8] },
-  { title:"💃 Zabójczo piękna",       tasks:[9] },
-  { title:"🌙 Późną porą…",           tasks:[10,11] }
+  { title:"💐 Niespodzianka po drodze",tasks:[4] },
+  { title:"💖 OBŁĘDNIE Cię Kocham",  tasks:[5,6] },
+  { title:"🍝 Przez serce do żołądka",tasks:[7,8,9] },
+  { title:"💃 Zabójczo piękna",       tasks:[10] },
+  { title:"🌙 Późną porą…",           tasks:[11,12] }
 ];
 
 // ─── HELPERS ──────────────────────────────────────────
@@ -483,7 +484,6 @@ function selectRole(r) {
 function startChallenges() {
   curTask = 0; uploads = {};
   
-  // Próba odzyskania stanu z LocalStorage (teraz linki do Cloudinary)
   try {
     const savedState = localStorage.getItem(`${role}_uploads_state`);
     if (savedState) {
@@ -513,13 +513,20 @@ function renderTask() {
 
   let interactHTML = '';
   if (task.choice) {
+    const pickedNum = uploads[curTask] ? uploads[curTask]._choice : undefined;
+    const isPicked = pickedNum !== undefined;
+
     interactHTML = `
       <p style="font-size:0.75rem;color:#aaa;letter-spacing:1px;text-transform:uppercase;text-align:center;margin-bottom:10px;">Wybierz opcję</p>
       <div class="options-grid">
-        <button class="option-btn ${uploads[curTask]._choice === 1 ? 'picked' : ''}" onclick="pickOption(this,1)">Opcja 1</button>
-        <button class="option-btn ${uploads[curTask]._choice === 2 ? 'picked' : ''}" onclick="pickOption(this,2)">Opcja 2</button>
-        <button class="option-btn ${uploads[curTask]._choice === 3 ? 'picked' : ''}" onclick="pickOption(this,3)">Opcja 3</button>
-        <button class="option-btn ${uploads[curTask]._choice === 4 ? 'picked' : ''}" onclick="pickOption(this,4)">Opcja 4</button>
+        <button class="option-btn ${pickedNum === 1 ? 'picked' : ''}" onclick="pickOption(this,1)">Opcja 1</button>
+        <button class="option-btn ${pickedNum === 2 ? 'picked' : ''}" onclick="pickOption(this,2)">Opcja 2</button>
+        <button class="option-btn ${pickedNum === 3 ? 'picked' : ''}" onclick="pickOption(this,3)">Opcja 3</button>
+        <button class="option-btn ${pickedNum === 4 ? 'picked' : ''}" onclick="pickOption(this,4)">Opcja 4</button>
+      </div>
+      <div id="choice-result" style="display:${isPicked ? 'block' : 'none'}; text-align:center; margin-top:24px; animation: card-enter 0.4s ease;">
+        <h3 style="font-family:'Dancing Script', cursive; font-size:2.4rem; color:var(--rose); margin-bottom:16px;">Pasta Miasta</h3>
+        ${mapSnippet}
       </div>`;
   } else {
     let slotsHTML = '';
@@ -581,7 +588,6 @@ async function handleUpload(file, idx, key) {
     const isVid = file.type.startsWith('video');
     const resourceType = isVid ? 'video' : 'image';
 
-    // Generowanie autoryzacji Signed Upload za pomocą API Secret
     const timestamp = Math.floor(Date.now() / 1000);
     const stringToSign = `timestamp=${timestamp}${API_SECRET}`;
 
@@ -591,7 +597,6 @@ async function handleUpload(file, idx, key) {
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     const signature = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
-    // Budowanie danych formularza do wysyłki
     const formData = new FormData();
     formData.append('file', file);
     formData.append('api_key', API_KEY);
@@ -608,11 +613,9 @@ async function handleUpload(file, idx, key) {
     const result = await response.json();
     const downloadUrl = result.secure_url;
 
-    // Aktualizacja lokalnego stanu
     uploads[curTask][key] = { url: downloadUrl, type: resourceType };
     localStorage.setItem(`${role}_uploads_state`, JSON.stringify(uploads));
 
-    // UI - podgląd
     const pw = document.getElementById('pw-'+idx);
     pw.style.display = 'flex';
     pw.innerHTML = `
@@ -644,6 +647,10 @@ function pickOption(btn, num) {
   btn.classList.add('picked');
   uploads[curTask] = { _choice: num };
   localStorage.setItem(`${role}_uploads_state`, JSON.stringify(uploads));
+  
+  const res = document.getElementById('choice-result');
+  if(res) res.style.display = 'block';
+
   checkReady();
 }
 
@@ -667,7 +674,6 @@ function submitTask() {
 
 // ─── FINALE (Z LOKALNYM STANEM CLOUDINARY) ────────────
 
-// Funkcja dodająca transformacje f_auto,q_auto do URL z Cloudinary!
 function optimizeUrl(url, type) {
   if (!url || type !== 'image') return url; 
   return url.replace('/upload/', '/upload/f_auto,q_auto/');
@@ -693,7 +699,7 @@ function buildFinale() {
   slidesEl.innerHTML = ''; dotsEl.innerHTML = ''; content.innerHTML = '';
 
   const heroImgs = [];
-  for (let t = 1; t <= 11; t++) {
+  for (let t = 1; t <= 12; t++) {
     ['her','him'].forEach(r => {
       const tasks = r==='her' ? TASKS_HER : TASKS_HIM;
       if (tasks[t-1]) {
@@ -710,7 +716,6 @@ function buildFinale() {
     slidesEl.innerHTML = `<div class="hero-slide" style="background:linear-gradient(135deg,#2a1520,#1a0a10);display:flex;align-items:center;justify-content:center;"><span style="font-size:5rem">💕</span></div>`;
   } else {
     heroList.forEach((m, i) => {
-      // Optymalizujemy wagę grafiki przy ładowaniu slidera
       const optimized = optimizeUrl(m.url, m.type);
       slidesEl.innerHTML += `<div class="hero-slide"><img src="${optimized}"></div>`;
       dotsEl.innerHTML   += `<div class="hero-dot${i===0?' on':''}" onclick="goSlide(${i})"></div>`;
